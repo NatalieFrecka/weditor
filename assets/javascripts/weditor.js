@@ -1,6 +1,8 @@
 function Weditor(inputElement) {
   this.inputElement = inputElement;
 
+  var keyEvent = "keydown";
+
   this.initialize = function(){
     this.controlsElement = Weditor.Utils.appendControls(inputElement);
     this.previewElement  = Weditor.Utils.appendPreview(inputElement);
@@ -10,6 +12,70 @@ function Weditor(inputElement) {
     this.activateInput( this.inputElement, this.controlsElement, this.previewElement );
 
     this.updatePreview();
+    Weditor.Utils.addEvent(this.inputElement, keyEvent, function(key){
+      // Check to see if we have a button key and, if so execute the callback.
+      if (key.ctrlKey || key.metaKey) {
+    
+        var keyCode = key.charCode || key.keyCode;
+        var keyCodeStr = String.fromCharCode(keyCode).toLowerCase();
+        
+        switch(keyCodeStr) {
+          case "b":
+            Weditor.Actions.bold($(inputElement))
+            break;
+          case "i":
+            Weditor.Actions.italic($(inputElement))
+            break;
+          case "l":
+            Weditor.Actions.link($(inputElement))
+            break;
+          case "q":
+            // doClick(document.getElementById("wmd-quote-button"));
+            console.log("QUOTE")
+            break;
+          case "o":
+            // doClick(document.getElementById("wmd-olist-button"));
+            console.log("ORDERED LIST")
+            break;
+          case "u":
+            Weditor.Actions.list($(inputElement))
+            break;
+          case "h":
+            // doClick(document.getElementById("wmd-heading-button"));
+            console.log("HEADER")
+            break;
+          case "r":
+            // doClick(document.getElementById("wmd-hr-button"));
+            console.log("HR BREAK")
+            break;
+          case "y":
+            // doClick(document.getElementById("wmd-redo-button"));
+            console.log("REDO")
+            break;
+          case "z":
+            if(key.shiftKey) {
+              // doClick(document.getElementById("wmd-redo-button"));
+              console.log("REDO")
+            }
+            else {
+              // doClick(document.getElementById("wmd-undo-button"));
+              console.log("UNDO")
+            }
+            break;
+          default:
+            return;
+        }
+        
+
+        if (key.preventDefault) {
+          key.preventDefault();
+        }
+        
+        if (top.event) {
+          top.event.returnValue = false;
+        }
+      }
+    });
   };
 
   this.click_on_control = false;
@@ -58,6 +124,7 @@ function Weditor(inputElement) {
     Weditor.Actions[ actionName ]( this.inputElement );
     this.updatePreview();
   };
+
 
   this.initialize();
 }
@@ -158,6 +225,17 @@ Weditor.Utils = {
     var template = "<div class=\"mdm-preview mdm-control\"></div>";
 
     return template;
+  },
+
+  addEvent: function(elem, event, listener){
+    if (elem.attachEvent) {
+      // IE only.  The "on" is mandatory.
+      elem.attachEvent("on" + event, listener);
+    }
+    else {
+      // Other browsers.
+      elem.addEventListener(event, listener, false);
+    }
   }
 }
 
