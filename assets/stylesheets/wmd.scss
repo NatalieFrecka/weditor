@@ -1,0 +1,71 @@
+@import "lib/variables";
+
+.wmd-editor { cursor: pointer; }
+
+.wmd-field {	
+	width: 100%;
+	height: 100%;
+
+	#wmd-button-bar {
+		width: 100%;
+		margin-top: $standard-spacing;
+
+		#wmd-button-row {
+			width: 100%;
+			height: 20px;
+			margin: 0;
+			padding: 0px;  
+			position: relative; 
+
+			.wmd-button {
+				width: 20px; 
+				height: 20px; 
+				margin-left: 0.5%;
+				margin-right: 0.5%;
+				
+				position: relative;
+				background-image: url(../../images/wmd-buttons.png);
+				background-repeat: no-repeat;
+				background-position: 0px 0px;
+				display: inline-block; 
+				list-style: none;
+
+				&:first-child {
+					margin-left: 0;
+				}
+
+				a {
+					width: 20px; 
+					height: 20px; 
+					margin-left: .5%;
+					margin-right: .5%;
+					
+					position: absolute;
+					display: inline-block; 
+				}
+			}
+
+			#wmd-help-button {
+				margin-right: 0;
+				float: right;
+			}
+		}
+	}
+
+	#wmd-input {
+		width: 100%;
+		margin-top: 3px;
+		position: relative;
+		border: 1px solid DarkGray;
+		font-size: 100%;
+
+		&:focus { outline: none; }
+	}
+
+	#wmd-preview {
+		width: 100%;
+		background-color: LightSkyBlue; 
+		
+		p { font-size: 100%; }
+	}
+}

@@ -1,0 +1,77 @@
+html, body {
+	width: 100%;
+	height: 100%;
+	margin: 0 auto;
+}
+
+.demo {
+	width: 100%;
+	height: 100%;
+	margin: 200px 0;
+}
+
+.weditor-container {
+	width: 20%;
+	margin: 50px auto;
+}
+
+.weditor {
+	width: 100%;
+	display: none;
+}
+
+input, textarea { 
+	width: 98.5%; 
+	margin: 0 auto;
+}
+
+input:focus, textarea:focus {
+	outline: none;
+}
+
+.mdm-buttons,
+.mdm-preview {
+	width: 100%;
+	margin: 0 auto;
+	line-height: 1em;
+	padding: 0px;
+	overflow: hidden;
+	background-color: white;
+	box-sizing: border-box;
+	cursor: pointer;
+}
+
+.mdm-buttons { font-size: 12px; }
+.mdm-buttons ul { margin: 10px; }
+
+.mdm-buttons ul li{
+	display: inline;
+	margin: 0;
+}
+
+.mdm-buttons ul li a{
+	padding: 5px;
+	color: black;
+	text-decoration: none;
+}
+
+.mdm-buttons ul li a span{ display: none; }
+
+.mdm-buttons ul li a:active{
+	color: #ccc;
+	position: relative;
+	top: 1px;
+}
+
+.mdm-preview ul {
+	margin-left: 20px;
+	list-style-type: disc;
+}
+
+.mdm-preview strong { font-weight: bold; }
+.mdm-preview em { font-style: italic; }
+.mdm-preview h1,.mdm-preview h2,.mdm-preview h3{ font-weight: bold; }
+.mdm-preview h1 { font-size: 18px; }
+.mdm-preview h2 { font-size: 14px; }
+.mdm-preview h3 { font-size: 12px; }
+.mdm-preview * { padding: 2px; }
