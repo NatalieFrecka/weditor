@@ -134,14 +134,12 @@ function Weditor(inputElement) {
   The logic of each of the control buttons
 */
 Weditor.Actions = {
-  bold: function( inputElement ){
-    var selection = $( inputElement ).getSelection();
-    $( inputElement ).replaceSelection( "**" + selection.text + "**" );
+  bold: function(inputElement){
+    Weditor.Utils.insertStarMarkup(inputElement, 2, "strong text");
   },
 
-  italic: function( inputElement ){
-    var selection = $( inputElement ).getSelection();
-    $( inputElement ).replaceSelection( "_" + selection.text + "_" );
+  italic: function(inputElement){
+    Weditor.Utils.insertStarMarkup(inputElement, 1, "italic text");
   },
 
   link: function( inputElement ){
@@ -187,6 +185,15 @@ Weditor.Utils = {
     $(inputElement).parent().after( element );
 
     return element;
+  },
+
+  insertStarMarkup: function(inputElement, nStars, text) {
+    var selection = $( inputElement ).getSelection();
+    if(selection.start == selection.end) {
+      $(inputElement).val($(inputElement).val() + ("*".repeat(nStars)) + text + ("*".repeat(nStars)));
+    } else {
+      $(inputElement).replaceSelection(("*".repeat(nStars)) + selection.text + ("*".repeat(nStars)));
+    }
   },
 
   selectWholeLines: function( inputElement ){
@@ -254,3 +261,6 @@ $(function(){
   $(".wedit-input").mdmagick();
 });
 
+String.prototype.repeat = function(num) {
+  return new Array( num + 1 ).join( this );
+}
