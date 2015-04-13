@@ -12,10 +12,9 @@ function Weditor(inputElement) {
     this.activateInput( this.inputElement, this.controlsElement, this.previewElement );
 
     this.updatePreview();
+
     Weditor.Utils.addEvent(this.inputElement, keyEvent, function(key){
-      // Check to see if we have a button key and, if so execute the callback.
       if (key.ctrlKey || key.metaKey) {
-    
         var keyCode = key.charCode || key.keyCode;
         var keyCodeStr = String.fromCharCode(keyCode).toLowerCase();
         
@@ -133,32 +132,33 @@ function Weditor(inputElement) {
 */
 Weditor.Actions = {
   bold: function(inputElement){
-    Weditor.Utils.insertStarMarkup($(inputElement), 2, "strong text");
+    var selection = $(inputElement).getSelection();
+    Weditor.Utils.insertAtCursor($(inputElement), selection, "**strong text**");
+    $(inputElement).replaceSelection("**" + $.trim(selection.text) + "**");
   },
 
   italic: function(inputElement){
-    Weditor.Utils.insertStarMarkup($(inputElement), 1, "italic text");
+    var selection = $(inputElement).getSelection();
+    Weditor.Utils.insertAtCursor($(inputElement), selection, "*italic text*");
+    $(inputElement).replaceSelection("*" + $.trim(selection.text) + "*");
   },
 
   link: function(inputElement){
-    var link = prompt( "Link to URL", "http://" );
     var selection = $(inputElement).getSelection();
+    var link = prompt( "Link to URL", "http://" );
     var linkNumber = $(inputElement).parent().next().children().first().children("a").size() + 1;
-    console.log(linkNumber);
-
-    if(selection.start == selection.end) {
-      // $(inputElement).val($(inputElement).val())
-    } else {
-      $(inputElement).replaceSelection( "[" + selection.text + "][" + linkNumber + "]");
-      $(inputElement).val($(inputElement).val() + "\n[" + linkNumber + "]: " + link);
-    }
+    var postfix = "\n[" + linkNumber + "]: " + link
+    Weditor.Utils.insertAtCursor($(inputElement), selection, "[link text][" + linkNumber + "]");
+    $(inputElement).replaceSelection( "[" + $.trim(selection.text) + "][" + linkNumber + "]");
+    $(inputElement).val($(inputElement).val() + postfix);
   },
 
-  title: function( inputElement ){
-    Weditor.Utils.selectWholeLines( inputElement );
-    var selection = $( inputElement ).getSelection();
+  title: function(inputElement){
+    Weditor.Utils.selectWholeLines(inputElement);
+    var selection = $(inputElement).getSelection();
     var hash = (selection.text.charAt( 0 ) == "#") ? "#" : "# ";
-    $( inputElement ).replaceSelection( hash + selection.text );
+    Weditor.Utils.insertAtCursor($(inputElement), selection, hash + "Heading");
+    $(inputElement).replaceSelection( hash + selection.text );
   },
 
   list: function( inputElement ){
@@ -193,15 +193,11 @@ Weditor.Utils = {
     return element;
   },
 
-  insertStarMarkup: function(inputElement, nStars, text) {
-    var selection = $(inputElement).getSelection();
+  insertAtCursor: function(inputElement, selection, styledText) {
     if(selection.start == selection.end) {
-      var styledInput = $(inputElement).val().substring(0, selection.start) + 
-                        ("*".repeat(nStars)) + text + ("*".repeat(nStars)) + 
+      var styledInput = $(inputElement).val().substring(0, selection.start) + styledText + 
                         $(inputElement).val().substring(selection.end, $(inputElement).val().length);
       $(inputElement).val(styledInput);
-    } else {
-      $(inputElement).replaceSelection(("*".repeat(nStars)) + selection.text + ("*".repeat(nStars)));
     }
   },
 
@@ -250,11 +246,9 @@ Weditor.Utils = {
 
   addEvent: function(elem, event, listener){
     if (elem.attachEvent) {
-      // IE only.  The "on" is mandatory.
       elem.attachEvent("on" + event, listener);
     }
     else {
-      // Other browsers.
       elem.addEventListener(event, listener, false);
     }
   }
@@ -269,7 +263,3 @@ $(function(){
 
   $(".wedit-input").mdmagick();
 });
-
-String.prototype.repeat = function(num) {
-  return new Array( num + 1 ).join( this );
-}
