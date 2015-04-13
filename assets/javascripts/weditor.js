@@ -21,13 +21,13 @@ function Weditor(inputElement) {
         
         switch(keyCodeStr) {
           case "b":
-            Weditor.Actions.bold($(inputElement))
+            Weditor.Actions.bold($(inputElement));
             break;
           case "i":
-            Weditor.Actions.italic($(inputElement))
+            Weditor.Actions.italic($(inputElement));
             break;
           case "l":
-            Weditor.Actions.link($(inputElement))
+            Weditor.Actions.link($(inputElement));
             break;
           case "q":
             // doClick(document.getElementById("wmd-quote-button"));
@@ -38,11 +38,10 @@ function Weditor(inputElement) {
             console.log("ORDERED LIST")
             break;
           case "u":
-            Weditor.Actions.list($(inputElement))
+            Weditor.Actions.list($(inputElement));
             break;
           case "h":
-            // doClick(document.getElementById("wmd-heading-button"));
-            console.log("HEADER")
+            Weditor.Actions.title($(inputElement));
             break;
           case "r":
             // doClick(document.getElementById("wmd-hr-button"));
@@ -142,10 +141,18 @@ Weditor.Actions = {
     Weditor.Utils.insertStarMarkup(inputElement, 1, "italic text");
   },
 
-  link: function( inputElement ){
+  link: function(inputElement){
     var link = prompt( "Link to URL", "http://" );
-    var selection = $( inputElement ).getSelection();
-    $( inputElement ).replaceSelection( "[" + selection.text + "](" + link + ")" );
+    var selection = $(inputElement).getSelection();
+    var linkNumber = $(inputElement).parent().next().children().first().children("a").size() + 1;
+    console.log(linkNumber);
+
+    if(selection.start == selection.end) {
+      // $(inputElement).val($(inputElement).val())
+    } else {
+      $(inputElement).replaceSelection( "[" + selection.text + "][" + linkNumber + "]");
+      $(inputElement).val($(inputElement).val() + "\n[" + linkNumber + "]: " + link);
+    }
   },
 
   title: function( inputElement ){
@@ -188,9 +195,12 @@ Weditor.Utils = {
   },
 
   insertStarMarkup: function(inputElement, nStars, text) {
-    var selection = $( inputElement ).getSelection();
+    var selection = $(inputElement).getSelection();
     if(selection.start == selection.end) {
-      $(inputElement).val($(inputElement).val() + ("*".repeat(nStars)) + text + ("*".repeat(nStars)));
+      var styledInput = inputElement.value.substring(0, selection.start) + 
+                        ("*".repeat(nStars)) + text + ("*".repeat(nStars)) + 
+                        inputElement.value.substring(selection.end, inputElement.value.length);
+      $(inputElement).val(styledInput);
     } else {
       $(inputElement).replaceSelection(("*".repeat(nStars)) + selection.text + ("*".repeat(nStars)));
     }
@@ -225,8 +235,8 @@ Weditor.Utils = {
       "    <li class=\"mdm-list\"><a class=\"mdm-icon-list2\" href=\"#mdm-list\"><span>ul</span></a></li>" +
       "    <li class=\"mdm-title\"><a class=\"mdm-icon-font-size\" href=\"#mdm-title\"><span>T</span></a></li>" +
       "    <li class=\"mdm-pagebreak\"><a class=\"mdm-icon-pagebreak\" href=\"#mdm-pagebreak\"><span>hr</span></a></li>" +
-      "    <li class=\"mdm-undo\"><a class=\"mdm-icon-undo\" href=\"#mdm-undo\"><span></span></a></li>" +
-      "    <li class=\"mdm-redo\"><a class=\"mdm-icon-redo\" href=\"#mdm-redo\"><span></span></a></li>" +
+      "    <li class=\"mdm-undo\"><a class=\"mdm-icon-undo\" href=\"#mdm-undo\"><span>z</span></a></li>" +
+      "    <li class=\"mdm-redo\"><a class=\"mdm-icon-redo\" href=\"#mdm-redo\"><span>y</span></a></li>" +
       "  </ul>" +
       "</div>";
 
