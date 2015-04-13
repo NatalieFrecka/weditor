@@ -128,17 +128,16 @@ function Weditor(inputElement) {
   this.initialize();
 }
 
-
 /*
   The logic of each of the control buttons
 */
 Weditor.Actions = {
   bold: function(inputElement){
-    Weditor.Utils.insertStarMarkup(inputElement, 2, "strong text");
+    Weditor.Utils.insertStarMarkup($(inputElement), 2, "strong text");
   },
 
   italic: function(inputElement){
-    Weditor.Utils.insertStarMarkup(inputElement, 1, "italic text");
+    Weditor.Utils.insertStarMarkup($(inputElement), 1, "italic text");
   },
 
   link: function(inputElement){
@@ -197,9 +196,9 @@ Weditor.Utils = {
   insertStarMarkup: function(inputElement, nStars, text) {
     var selection = $(inputElement).getSelection();
     if(selection.start == selection.end) {
-      var styledInput = inputElement.value.substring(0, selection.start) + 
+      var styledInput = $(inputElement).val().substring(0, selection.start) + 
                         ("*".repeat(nStars)) + text + ("*".repeat(nStars)) + 
-                        inputElement.value.substring(selection.end, inputElement.value.length);
+                        $(inputElement).val().substring(selection.end, $(inputElement).val().length);
       $(inputElement).val(styledInput);
     } else {
       $(inputElement).replaceSelection(("*".repeat(nStars)) + selection.text + ("*".repeat(nStars)));
