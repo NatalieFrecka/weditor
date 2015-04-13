@@ -29,12 +29,10 @@ function Weditor(inputElement) {
             Weditor.Actions.link($(inputElement));
             break;
           case "q":
-            // doClick(document.getElementById("wmd-quote-button"));
-            console.log("QUOTE")
+            Weditor.Actions.quote($(inputElement));
             break;
           case "o":
-            // doClick(document.getElementById("wmd-olist-button"));
-            console.log("ORDERED LIST")
+            Weditor.Actions.olist($(inputElement));
             break;
           case "u":
             Weditor.Actions.list($(inputElement));
@@ -43,21 +41,17 @@ function Weditor(inputElement) {
             Weditor.Actions.title($(inputElement));
             break;
           case "r":
-            // doClick(document.getElementById("wmd-hr-button"));
-            console.log("HR BREAK")
+            Weditor.Actions.pagebreak($(inputElement));
             break;
           case "y":
-            // doClick(document.getElementById("wmd-redo-button"));
-            console.log("REDO")
+            Weditor.Actions.redo($(inputElement));
             break;
           case "z":
             if(key.shiftKey) {
-              // doClick(document.getElementById("wmd-redo-button"));
-              console.log("REDO")
+              Weditor.Actions.redo($(inputElement));
             }
             else {
-              // doClick(document.getElementById("wmd-undo-button"));
-              console.log("UNDO")
+              Weditor.Actions.undo($(inputElement));
             }
             break;
           default:
@@ -80,7 +74,7 @@ function Weditor(inputElement) {
 
   this.activateControls = function( controlsElement ){
     var _self = this;
-    ["bold", "italic", "link", "title", "list"].forEach( function( actionName ){
+    ["bold", "italic", "link", "quotes", "title", "olist", "list", "pagebreak", "undo", "redo"].forEach( function( actionName ){
       $( controlsElement ).find( ".mdm-" + actionName ).click( function( event ){ _self.action( actionName, event ) } );
     });
   };
@@ -131,26 +125,41 @@ function Weditor(inputElement) {
   The logic of each of the control buttons
 */
 Weditor.Actions = {
-  bold: function(inputElement){
+  bold: function(inputElement) {
     var selection = $(inputElement).getSelection();
     Weditor.Utils.insertAtCursor($(inputElement), selection, "**strong text**");
     $(inputElement).replaceSelection("**" + $.trim(selection.text) + "**");
   },
 
-  italic: function(inputElement){
+  italic: function(inputElement) {
     var selection = $(inputElement).getSelection();
     Weditor.Utils.insertAtCursor($(inputElement), selection, "*italic text*");
     $(inputElement).replaceSelection("*" + $.trim(selection.text) + "*");
   },
 
-  link: function(inputElement){
+  link: function(inputElement) {
     var selection = $(inputElement).getSelection();
     var link = prompt( "Link to URL", "http://" );
     var linkNumber = $(inputElement).parent().next().children().first().children("a").size() + 1;
     var postfix = "\n[" + linkNumber + "]: " + link
     Weditor.Utils.insertAtCursor($(inputElement), selection, "[link text][" + linkNumber + "]");
-    $(inputElement).replaceSelection( "[" + $.trim(selection.text) + "][" + linkNumber + "]");
+    $(inputElement).replaceSelection("[" + $.trim(selection.text) + "][" + linkNumber + "]");
     $(inputElement).val($(inputElement).val() + postfix);
+  },
+
+  quotes: function(inputElement) {
+    // Figure out what wmd is doing to make showdown recognize blockquote markdown
+    Weditor.Utils.selectWholeLines(inputElement);
+    var selection = $(inputElement).getSelection();
+    var result = "";
+    var lines = selection.text.split( "\n" );
+    for(var i = 0; i < lines.length; i++) {
+      var line = $.trim(lines[i]);
+      if(line.length > 0) result += "> " + line + "\n";
+    }
+
+    Weditor.Utils.insertAtCursor($(inputElement), selection, "> blockquote");
+    $(inputElement).replaceSelection(result);
   },
 
   title: function(inputElement){
@@ -161,18 +170,51 @@ Weditor.Actions = {
     $(inputElement).replaceSelection( hash + selection.text );
   },
 
-  list: function( inputElement ){
-    Weditor.Utils.selectWholeLines( inputElement );
-    var selection = $( inputElement ).getSelection();
-    var text = selection.text;
+  olist: function(inputElement) {
+    // Figure out what wmd is doing to make showdown recognize ordered list markdown
+    // Figure out what wmd does to make keypress enter add new list line
+    // Figure out how to handle multiple ordered lists per textarea
+    // How to generate default number for ordered lists
+    Weditor.Utils.selectWholeLines(inputElement);
+    var selection = $(inputElement).getSelection();
     var result = "";
-    var lines = text.split( "\n" );
-    for( var i = 0; i < lines.length; i++ ){
-      var line = $.trim( lines[i] );
-      if( line.length > 0 ) result += "- " + line + "\n";
+    var lines = selection.text.split("\n");
+    for(var i = 0; i < lines.length; i++) {
+      var line = $.trim(lines[i]);
+      if(line.length > 0) result += (i + 1) + ". " + line + "\n";
     }
 
-    $( inputElement ).replaceSelection( result );
+    $(inputElement).replaceSelection(result);
+  },
+
+  list: function(inputElement) {
+    // Figure out what wmd does to make keypress enter add new list line
+    Weditor.Utils.selectWholeLines(inputElement);
+    var selection = $(inputElement).getSelection();
+    var result = "";
+    var lines = selection.text.split("\n");
+    for(var i = 0; i < lines.length; i++) {
+      var line = $.trim(lines[i]);
+      if(line.length > 0) result += "- " + line + "\n";
+    }
+
+    Weditor.Utils.insertAtCursor($(inputElement), selection, "- List item");
+    $(inputElement).replaceSelection(result);
+  },
+
+  pagebreak: function(inputElement) {
+    var selection = $(inputElement).getSelection();
+    var hRule = "\n----------\n";
+    Weditor.Utils.insertAtCursor($(inputElement), selection, hRule);
+    $(inputElement).replaceSelection(hRule);
+  },
+
+  undo: function(inputElement) {
+
+  },
+
+  redo: function(inputElement) {
+
   }
 }
 
@@ -194,7 +236,7 @@ Weditor.Utils = {
   },
 
   insertAtCursor: function(inputElement, selection, styledText) {
-    if(selection.start == selection.end) {
+    if(selection.length === 0) {
       var styledInput = $(inputElement).val().substring(0, selection.start) + styledText + 
                         $(inputElement).val().substring(selection.end, $(inputElement).val().length);
       $(inputElement).val(styledInput);
