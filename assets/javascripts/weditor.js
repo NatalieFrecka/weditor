@@ -210,27 +210,27 @@ Weditor.Actions = {
   },
 
   undo: function(inputElement) {
-
+    console.log("UNDO")
   },
 
   redo: function(inputElement) {
-
+    console.log("REDO")
   }
 }
 
 Weditor.Utils = {
-  appendControls: function( inputElement ){
-    var element = $( Weditor.Utils.controlsTemplate() );
-    $(inputElement).before( element );
+  appendControls: function(inputElement) {
+    var element = $(Weditor.Utils.controlsTemplate());
+    $(inputElement).before(element);
 
     return element;
   },
 
-  appendPreview: function( inputElement ){
-    var element = $( Weditor.Utils.previewTemplate() );
-    element.css( "font-size", $( inputElement ).css( "font-size" ) );
-    element.css( "background-color", $( inputElement ).css( "background-color" ) );
-    $(inputElement).parent().after( element );
+  appendPreview: function(inputElement) {
+    var element = $(Weditor.Utils.previewTemplate());
+    element.css("font-size", $(inputElement).css("font-size"));
+    element.css("background-color", $(inputElement).css("background-color"));
+    $(inputElement).parent().after(element);
 
     return element;
   },
@@ -243,24 +243,24 @@ Weditor.Utils = {
     }
   },
 
-  selectWholeLines: function( inputElement ){
-    var content = $( inputElement ).val();
-    var selection = $( inputElement ).getSelection();
+  selectWholeLines: function(inputElement) {
+    var content = $(inputElement).val();
+    var selection = $(inputElement).getSelection();
     var iniPosition = (selection.start > 0) ? (selection.start - 1) : 0;
     var endPosition = selection.end;
 
-    while( content[iniPosition] != "\n" && iniPosition >= 0 ) {
+    while(content[iniPosition] != "\n" && iniPosition >= 0) {
       iniPosition--;
     }
 
-    while( content[endPosition] != "\n" && endPosition <= content.length ) {
+    while(content[endPosition] != "\n" && endPosition <= content.length) {
       endPosition++;
     }
 
-    $( inputElement ).setSelection( iniPosition + 1, endPosition );
+    $(inputElement).setSelection(iniPosition + 1, endPosition);
   },
 
-  controlsTemplate: function(){
+  controlsTemplate: function() {
     var template =
       "<div class=\"mdm-buttons mdm-control\">" +
       "  <ul>" +
@@ -280,13 +280,13 @@ Weditor.Utils = {
     return template;
   },
 
-  previewTemplate: function(){
+  previewTemplate: function() {
     var template = "<div class=\"mdm-preview mdm-control\"></div>";
 
     return template;
   },
 
-  addEvent: function(elem, event, listener){
+  addEvent: function(elem, event, listener) {
     if (elem.attachEvent) {
       elem.attachEvent("on" + event, listener);
     }
