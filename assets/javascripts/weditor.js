@@ -153,10 +153,11 @@ Weditor.Actions = {
   },
 
   quotes: function(inputElement) {
+    alert("Blockquotes are not yet functional");
     // Figure out what wmd "postprocessing" doing to make showdown recognize blockquote markdown
-    Weditor.Utils.selectWholeLines(inputElement);
-    var selection = $(inputElement).getSelection();
-    Weditor.Utils.doBlockquote($(inputElement), selection, true)
+    // Weditor.Utils.selectWholeLines(inputElement);
+    // var selection = $(inputElement).getSelection();
+    // Weditor.Utils.doBlockquote($(inputElement), selection, true)
   },
 
   title: function(inputElement){
@@ -189,10 +190,12 @@ Weditor.Actions = {
   },
 
   undo: function(inputElement) {
+    alert("Undo is not yet functional");
     console.log("UNDO")
   },
 
   redo: function(inputElement) {
+    alert("Redo is not yet functional");
     console.log("REDO")
   }
 }
