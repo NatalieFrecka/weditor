@@ -129,9 +129,6 @@ function Weditor(inputElement) {
   this.initialize();
 }
 
-/*
-  The logic of each of the control buttons
-*/
 Weditor.Actions = {
   bold: function(inputElement) {
     var selection = $(inputElement).getSelection();
@@ -302,84 +299,47 @@ Weditor.Utils = {
   doBlockquote: function(inputElement, selection, useDefaultText) {
     var before = $(inputElement).val().substring(0, selection.start);
     var after = $(inputElement).val().substring(selection.end, $(inputElement).val().length);
-
-    var chunkText = selection.text.replace(/^(\n*)([^\r]+?)(\n*)$/,
-      function(totalMatch, newlinesBefore, text, newlinesAfter){
-        before += newlinesBefore;
-        after = newlinesAfter + after;
-        return text;
-      });
-      
-    before = before.replace(/(>[ \t]*)$/,
-      function(totalMatch, blankLine){
-        chunkText = blankLine + chunkText;
-        return "";
-      });
-    
+    var chunkText = selection.text.replace(/^(\s|>)+$/ ,"");
     var defaultText = useDefaultText ? "Blockquote" : "";
-    chunkText = chunkText.replace(/^(\s|>)+$/ ,"");
-    chunkText = chunkText || defaultText;
-    
-    if(before){
-      before = before.replace(/\n?$/,"\n");
-    }
-    if(after){
-      after = after.replace(/^\n?/,"\n");
-    }
-    
     var startTag = "";
     var endTag = "";
 
-    before = before.replace(/(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*$)/,
-      function(totalMatch){
-        var startTag = totalMatch;
-        return "";
-      });
-      
-    after = after.replace(/^(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*)/,
-      function(totalMatch){
-        var endTag = totalMatch;
-        return "";
-      });
+    chunkText = chunkText || defaultText;
     
-    var replaceBlanksInTags = function(useBracket, startTag, endTag){
+    var replaceBlanksInTags = function(useBracket, startTag, endTag) {
       var replacement = useBracket ? "> " : "";
-      
-      if(startTag){
+      if(startTag) {
         startTag = startTag.replace(/\n((>|\s)*)\n$/,
-          function(totalMatch, markdown){
+          function(totalMatch, markdown) {
             return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
           });
       }
-      if(endTag){
+
+      if(endTag) {
         endTag = endTag.replace(/^\n((>|\s)*)\n/,
-          function(totalMatch, markdown){
+          function(totalMatch, markdown) {
             return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
           });
       }
     };
     
-    if(/^(?![ ]{0,3}>)/m.test(chunkText)){
-      // command.wrap(chunk, wmd.wmd_env.lineLength - 2);
+    if(/^(?![ ]{0,3}>)/m.test(chunkText)) {
       chunkText = chunkText.replace(/^/gm, "> ");
       replaceBlanksInTags(true, startTag, endTag);
-      // chunk.addBlankLines();
-    }
-    else{
+    } else {
       chunkText = chunkText.replace(/^[ ]{0,3}> ?/gm, "");
-      // command.unwrap(chunk);
       replaceBlanksInTags(false, startTag, endTag);
       
-      if(!/^(\n|^)[ ]{0,3}>/.test(chunkText) && startTag){
+      if(!/^(\n|^)[ ]{0,3}>/.test(chunkText) && startTag) {
         startTag = startTag.replace(/\n{0,2}$/, "\n\n");
       }
       
-      if(!/(\n|^)[ ]{0,3}>.*$/.test(chunkText) && endTag){
+      if(!/(\n|^)[ ]{0,3}>.*$/.test(chunkText) && endTag) {
         endTag = endTag.replace(/^\n{0,2}/, "\n\n");
       }
     }
     
-    if(!/\n/.test(chunkText)){
+    if(!/\n/.test(chunkText)) {
       chunkText = chunkText.replace(/^(> *)/,
       function(wholeMatch, blanks){
         startTag += blanks;
