@@ -57,7 +57,6 @@ function Weditor(inputElement) {
           default:
             return;
         }
-        
 
         if (key.preventDefault) {
           key.preventDefault();
@@ -95,7 +94,7 @@ function Weditor(inputElement) {
   this.activateInput = function( inputElement, controlsElement, previewElement ){
     var _self = this;
 
-    $(controlsElement).click( function(){
+    $(controlsElement).mousedown(function(){
       _self.click_on_control = true;
     });
 
@@ -134,12 +133,14 @@ Weditor.Actions = {
     var selection = $(inputElement).getSelection();
     Weditor.Utils.insertAtCursor($(inputElement), selection, "**strong text**");
     $(inputElement).replaceSelection("**" + $.trim(selection.text) + "**");
+    Weditor.Utils.refreshPreview($(inputElement));
   },
 
   italic: function(inputElement) {
     var selection = $(inputElement).getSelection();
     Weditor.Utils.insertAtCursor($(inputElement), selection, "*italic text*");
     $(inputElement).replaceSelection("*" + $.trim(selection.text) + "*");
+    Weditor.Utils.refreshPreview($(inputElement));
   },
 
   link: function(inputElement) {
@@ -147,9 +148,12 @@ Weditor.Actions = {
     var link = prompt( "Link to URL", "http://" );
     var linkNumber = $(inputElement).parent().next().children().first().children("a").size() + 1;
     var postfix = "\n[" + linkNumber + "]: " + link
-    Weditor.Utils.insertAtCursor($(inputElement), selection, "[link text][" + linkNumber + "]");
-    $(inputElement).replaceSelection("[" + $.trim(selection.text) + "][" + linkNumber + "]");
-    $(inputElement).val($(inputElement).val() + postfix);
+    if(link) {
+      Weditor.Utils.insertAtCursor($(inputElement), selection, "[link text][" + linkNumber + "]");
+      $(inputElement).replaceSelection("[" + $.trim(selection.text) + "][" + linkNumber + "]");
+      $(inputElement).val($(inputElement).val() + postfix);
+      Weditor.Utils.refreshPreview($(inputElement));
+    }
   },
 
   quotes: function(inputElement) {
@@ -158,6 +162,7 @@ Weditor.Actions = {
     // Weditor.Utils.selectWholeLines(inputElement);
     // var selection = $(inputElement).getSelection();
     // Weditor.Utils.doBlockquote($(inputElement), selection, true)
+    // Weditor.Utils.refreshPreview($(inputElement));
   },
 
   title: function(inputElement){
@@ -166,6 +171,7 @@ Weditor.Actions = {
     var hash = (selection.text.charAt( 0 ) == "#") ? "#" : "# ";
     Weditor.Utils.insertAtCursor($(inputElement), selection, hash + "Heading");
     $(inputElement).replaceSelection(hash + selection.text);
+    Weditor.Utils.refreshPreview($(inputElement));
   },
 
   olist: function(inputElement) {
@@ -174,19 +180,22 @@ Weditor.Actions = {
     Weditor.Utils.selectWholeLines(inputElement);
     var selection = $(inputElement).getSelection();
     Weditor.Utils.doList($(inputElement), selection, true, true);
+    Weditor.Utils.refreshPreview($(inputElement));
   },
 
   list: function(inputElement) {
     Weditor.Utils.selectWholeLines(inputElement);
     var selection = $(inputElement).getSelection();
     Weditor.Utils.doList($(inputElement), selection, false, true);
+    Weditor.Utils.refreshPreview($(inputElement));
   },
 
   pagebreak: function(inputElement) {
     var selection = $(inputElement).getSelection();
-    var hRule = "\n----------\n";
+    var hRule = "\n\n----------\n";
     Weditor.Utils.insertAtCursor($(inputElement), selection, hRule);
     $(inputElement).replaceSelection(hRule);
+    Weditor.Utils.refreshPreview($(inputElement));
   },
 
   undo: function(inputElement) {
@@ -404,6 +413,12 @@ Weditor.Utils = {
     var template = "<div class=\"mdm-preview mdm-control\"></div>";
 
     return template;
+  },
+
+  refreshPreview: function(inputElement) {
+    var converter = new Attacklab.showdown.converter();
+    var preview = $(inputElement).parent().next();
+    $(preview).html(converter.makeHtml($(inputElement).val().replace(/</g,'&lt;').replace(/>/g,'&gt;')));
   },
 
   addEvent: function(elem, event, listener) {
