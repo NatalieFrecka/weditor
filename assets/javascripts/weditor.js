@@ -29,7 +29,7 @@ function Weditor(inputElement) {
             Weditor.Actions.link($(inputElement));
             break;
           case "q":
-            Weditor.Actions.quote($(inputElement));
+            Weditor.Actions.quotes($(inputElement));
             break;
           case "o":
             Weditor.Actions.olist($(inputElement));
@@ -73,7 +73,7 @@ function Weditor(inputElement) {
       if (!key.shiftKey && !key.ctrlKey && !key.metaKey) {
         var keyCode = key.charCode || key.keyCode;
         if (keyCode === 13) {
-          Weditor.Utils.doAutoindent($(inputElement), $(inputElement).getSelection(), true);
+          Weditor.Utils.doAutoindent($(inputElement), $(inputElement).getSelection());
         }
       }
     });
@@ -157,18 +157,10 @@ Weditor.Actions = {
   },
 
   quotes: function(inputElement) {
-    // Figure out what wmd is doing to make showdown recognize blockquote markdown
+    // Figure out what wmd "postprocessing" doing to make showdown recognize blockquote markdown
     Weditor.Utils.selectWholeLines(inputElement);
     var selection = $(inputElement).getSelection();
-    var result = "";
-    var lines = selection.text.split( "\n" );
-    for(var i = 0; i < lines.length; i++) {
-      var line = $.trim(lines[i]);
-      if(line.length > 0) result += "> " + line + "\n";
-    }
-
-    Weditor.Utils.insertAtCursor($(inputElement), selection, "> blockquote");
-    $(inputElement).replaceSelection(result);
+    Weditor.Utils.doBlockquote($(inputElement), selection, true)
   },
 
   title: function(inputElement){
@@ -226,7 +218,7 @@ Weditor.Utils = {
     return element;
   },
 
-  doAutoindent: function(inputElement, selection, useDefaultText) {
+  doAutoindent: function(inputElement, selection) {
     var before = $(inputElement).val().substring(0, selection.start);
     before = before.replace(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]*\n$/, "\n\n");
     before = before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/, "\n\n");
@@ -244,12 +236,12 @@ Weditor.Utils = {
         Weditor.Utils.doList($(inputElement), selection, true, true);
       }
     }
-    // Blockquotes
-    // if(/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(before)){
-    //   if(Weditor.Utils.doBlockquote){
-    //     Weditor.Utils.doBlockquote(chunk, postProcessing, useDefaultText);
-    //   }
-    // }
+
+    if(/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(before)){
+      if(Weditor.Utils.doBlockquote){
+        Weditor.Utils.doBlockquote($(inputElement), selection, true);
+      }
+    }
   },
 
   doList: function(inputElement, selection, isNumberedList, useDefaultText) {
@@ -258,7 +250,6 @@ Weditor.Utils = {
     var num = 1;
     var text = selection.text
     var before = $(inputElement).val().substring(0, selection.start);
-    var after = $(inputElement).val().substring(selection.end, $(inputElement).val().length);
     
     var getItemPrefix = function() {
       var prefix;
@@ -309,90 +300,98 @@ Weditor.Utils = {
     Weditor.Utils.insertAtCursor($(inputElement), selection, result);
   },
 
-  // doBlockquote: function(chunk, postProcessing, useDefaultText) {
-    
-  //   chunk.selection = chunk.selection.replace(/^(\n*)([^\r]+?)(\n*)$/,
-  //     function(totalMatch, newlinesBefore, text, newlinesAfter){
-  //       chunk.before += newlinesBefore;
-  //       chunk.after = newlinesAfter + chunk.after;
-  //       return text;
-  //     });
+  doBlockquote: function(inputElement, selection, useDefaultText) {
+    var before = $(inputElement).val().substring(0, selection.start);
+    var after = $(inputElement).val().substring(selection.end, $(inputElement).val().length);
+
+    var chunkText = selection.text.replace(/^(\n*)([^\r]+?)(\n*)$/,
+      function(totalMatch, newlinesBefore, text, newlinesAfter){
+        before += newlinesBefore;
+        after = newlinesAfter + after;
+        return text;
+      });
       
-  //   chunk.before = chunk.before.replace(/(>[ \t]*)$/,
-  //     function(totalMatch, blankLine){
-  //       chunk.selection = blankLine + chunk.selection;
-  //       return "";
-  //     });
+    before = before.replace(/(>[ \t]*)$/,
+      function(totalMatch, blankLine){
+        chunkText = blankLine + chunkText;
+        return "";
+      });
     
-  //   var defaultText = useDefaultText ? "Blockquote" : "";
-  //   chunk.selection = chunk.selection.replace(/^(\s|>)+$/ ,"");
-  //   chunk.selection = chunk.selection || defaultText;
+    var defaultText = useDefaultText ? "Blockquote" : "";
+    chunkText = chunkText.replace(/^(\s|>)+$/ ,"");
+    chunkText = chunkText || defaultText;
     
-  //   if(chunk.before){
-  //     chunk.before = chunk.before.replace(/\n?$/,"\n");
-  //   }
-  //   if(chunk.after){
-  //     chunk.after = chunk.after.replace(/^\n?/,"\n");
-  //   }
+    if(before){
+      before = before.replace(/\n?$/,"\n");
+    }
+    if(after){
+      after = after.replace(/^\n?/,"\n");
+    }
     
-  //   chunk.before = chunk.before.replace(/(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*$)/,
-  //     function(totalMatch){
-  //       chunk.startTag = totalMatch;
-  //       return "";
-  //     });
+    var startTag = "";
+    var endTag = "";
+
+    before = before.replace(/(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*$)/,
+      function(totalMatch){
+        var startTag = totalMatch;
+        return "";
+      });
       
-  //   chunk.after = chunk.after.replace(/^(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*)/,
-  //     function(totalMatch){
-  //       chunk.endTag = totalMatch;
-  //       return "";
-  //     });
+    after = after.replace(/^(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*)/,
+      function(totalMatch){
+        var endTag = totalMatch;
+        return "";
+      });
     
-  //   var replaceBlanksInTags = function(useBracket){
+    var replaceBlanksInTags = function(useBracket, startTag, endTag){
+      var replacement = useBracket ? "> " : "";
       
-  //     var replacement = useBracket ? "> " : "";
-      
-  //     if(chunk.startTag){
-  //       chunk.startTag = chunk.startTag.replace(/\n((>|\s)*)\n$/,
-  //         function(totalMatch, markdown){
-  //           return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
-  //         });
-  //     }
-  //     if(chunk.endTag){
-  //       chunk.endTag = chunk.endTag.replace(/^\n((>|\s)*)\n/,
-  //         function(totalMatch, markdown){
-  //           return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
-  //         });
-  //     }
-  //   };
+      if(startTag){
+        startTag = startTag.replace(/\n((>|\s)*)\n$/,
+          function(totalMatch, markdown){
+            return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
+          });
+      }
+      if(endTag){
+        endTag = endTag.replace(/^\n((>|\s)*)\n/,
+          function(totalMatch, markdown){
+            return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
+          });
+      }
+    };
     
-  //   if(/^(?![ ]{0,3}>)/m.test(chunk.selection)){
-  //     command.wrap(chunk, wmd.wmd_env.lineLength - 2);
-  //     chunk.selection = chunk.selection.replace(/^/gm, "> ");
-  //     replaceBlanksInTags(true);
-  //     chunk.addBlankLines();
-  //   }
-  //   else{
-  //     chunk.selection = chunk.selection.replace(/^[ ]{0,3}> ?/gm, "");
-  //     command.unwrap(chunk);
-  //     replaceBlanksInTags(false);
+    if(/^(?![ ]{0,3}>)/m.test(chunkText)){
+      // command.wrap(chunk, wmd.wmd_env.lineLength - 2);
+      chunkText = chunkText.replace(/^/gm, "> ");
+      replaceBlanksInTags(true, startTag, endTag);
+      // chunk.addBlankLines();
+    }
+    else{
+      chunkText = chunkText.replace(/^[ ]{0,3}> ?/gm, "");
+      // command.unwrap(chunk);
+      replaceBlanksInTags(false, startTag, endTag);
       
-  //     if(!/^(\n|^)[ ]{0,3}>/.test(chunk.selection) && chunk.startTag){
-  //       chunk.startTag = chunk.startTag.replace(/\n{0,2}$/, "\n\n");
-  //     }
+      if(!/^(\n|^)[ ]{0,3}>/.test(chunkText) && startTag){
+        startTag = startTag.replace(/\n{0,2}$/, "\n\n");
+      }
       
-  //     if(!/(\n|^)[ ]{0,3}>.*$/.test(chunk.selection) && chunk.endTag){
-  //       chunk.endTag=chunk.endTag.replace(/^\n{0,2}/, "\n\n");
-  //     }
-  //   }
+      if(!/(\n|^)[ ]{0,3}>.*$/.test(chunkText) && endTag){
+        endTag = endTag.replace(/^\n{0,2}/, "\n\n");
+      }
+    }
     
-  //   if(!/\n/.test(chunk.selection)){
-  //     chunk.selection = chunk.selection.replace(/^(> *)/,
-  //     function(wholeMatch, blanks){
-  //       chunk.startTag += blanks;
-  //       return "";
-  //     });
-  //   }
-  // },
+    if(!/\n/.test(chunkText)){
+      chunkText = chunkText.replace(/^(> *)/,
+      function(wholeMatch, blanks){
+        startTag += blanks;
+        return "";
+      });
+    }
+
+    var result = startTag + chunkText + endTag
+    $(inputElement).replaceSelection(result);
+    Weditor.Utils.insertAtCursor($(inputElement), selection, result);
+  },
 
   insertAtCursor: function(inputElement, selection, styledText) {
     if(selection.length === 0) {
