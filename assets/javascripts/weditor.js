@@ -126,7 +126,6 @@ function Weditor(inputElement) {
     this.updatePreview();
   };
 
-
   this.initialize();
 }
 
@@ -422,16 +421,16 @@ Weditor.Utils = {
     var template =
       "<div class=\"mdm-buttons mdm-control\">" +
       "  <ul>" +
-      "    <li class=\"mdm-bold\"><a class=\"mdm-icon-bold\" href=\"#mdm-bold\"><span>B</span></a></li>" +
-      "    <li class=\"mdm-italic\"><a class=\"mdm-icon-italic\" href=\"#mdm-italic\"><span>I</span></a></li>" +
-      "    <li class=\"mdm-link\"><a class=\"mdm-icon-link\" href=\"#mdm-link\"><span>a</span></a></li>" +
-      "    <li class=\"mdm-quotes\"><a class=\"mdm-icon-quotes-left\" href=\"#mdm-quotes\"><span>q</span></a></li>" +
-      "    <li class=\"mdm-olist\"><a class=\"mdm-icon-list-numbered\" href=\"#mdm-olist\"><span>ol</span></a></li>" +
-      "    <li class=\"mdm-list\"><a class=\"mdm-icon-list2\" href=\"#mdm-list\"><span>ul</span></a></li>" +
-      "    <li class=\"mdm-title\"><a class=\"mdm-icon-font-size\" href=\"#mdm-title\"><span>T</span></a></li>" +
-      "    <li class=\"mdm-pagebreak\"><a class=\"mdm-icon-pagebreak\" href=\"#mdm-pagebreak\"><span>hr</span></a></li>" +
-      "    <li class=\"mdm-undo\"><a class=\"mdm-icon-undo\" href=\"#mdm-undo\"><span>z</span></a></li>" +
-      "    <li class=\"mdm-redo\"><a class=\"mdm-icon-redo\" href=\"#mdm-redo\"><span>y</span></a></li>" +
+      "    <li class=\"mdm-bold\" title=\"Strong <strong> Ctrl+B\"><a class=\"mdm-icon-bold\" href=\"#mdm-bold\"><span>B</span></a></li>" +
+      "    <li class=\"mdm-italic\" title=\"Emphasis <em> Ctrl+I\"><a class=\"mdm-icon-italic\" href=\"#mdm-italic\"><span>I</span></a></li>" +
+      "    <li class=\"mdm-link\" title=\"Hyperlink <a> Ctrl+L\"><a class=\"mdm-icon-link\" href=\"#mdm-link\"><span>a</span></a></li>" +
+      "    <li class=\"mdm-quotes\" title=\"Blockquote <blockquote> Ctrl+Q\"><a class=\"mdm-icon-quotes-left\" href=\"#mdm-quotes\"><span>q</span></a></li>" +
+      "    <li class=\"mdm-olist\" title=\"Numbered List <ol> Ctrl+O\"><a class=\"mdm-icon-list-numbered\" href=\"#mdm-olist\"><span>ol</span></a></li>" +
+      "    <li class=\"mdm-list\" title=\"Bulleted List <ul> Ctrl+U\"><a class=\"mdm-icon-list2\" href=\"#mdm-list\"><span>ul</span></a></li>" +
+      "    <li class=\"mdm-title\" title=\"Heading <h1>/<h2> Ctrl+H\"><a class=\"mdm-icon-font-size\" href=\"#mdm-title\"><span>T</span></a></li>" +
+      "    <li class=\"mdm-pagebreak\" title=\"Horizontal Rule <hr> Ctrl+R\"><a class=\"mdm-icon-pagebreak\" href=\"#mdm-pagebreak\"><span>hr</span></a></li>" +
+      "    <li class=\"mdm-undo\" title=\"Undo - Ctrl+Z\"><a class=\"mdm-icon-undo\" href=\"#mdm-undo\"><span>z</span></a></li>" +
+      "    <li class=\"mdm-redo\" title=\"Redo - Ctrl+Shift+Z\"><a class=\"mdm-icon-redo\" href=\"#mdm-redo\"><span>y</span></a></li>" +
       "  </ul>" +
       "</div>";
 
