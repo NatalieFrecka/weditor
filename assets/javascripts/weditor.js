@@ -68,6 +68,15 @@ function Weditor(inputElement) {
         }
       }
     });
+
+    Weditor.Utils.addEvent(this.inputElement, "keyup", function(key) {
+      if (!key.shiftKey && !key.ctrlKey && !key.metaKey) {
+        var keyCode = key.charCode || key.keyCode;
+        if (keyCode === 13) {
+          Weditor.Utils.doAutoindent($(inputElement), $(inputElement).getSelection(), true);
+        }
+      }
+    });
   };
 
   this.click_on_control = false;
@@ -167,24 +176,22 @@ Weditor.Actions = {
     var selection = $(inputElement).getSelection();
     var hash = (selection.text.charAt( 0 ) == "#") ? "#" : "# ";
     Weditor.Utils.insertAtCursor($(inputElement), selection, hash + "Heading");
-    $(inputElement).replaceSelection( hash + selection.text );
+    $(inputElement).replaceSelection(hash + selection.text);
   },
 
   olist: function(inputElement) {
     // Figure out what wmd is doing to make showdown recognize ordered list markdown
-    // Figure out what wmd does to make keypress enter add new list line
     // Figure out how to handle multiple ordered lists per textarea
-    // How to generate default number for ordered lists
     Weditor.Utils.selectWholeLines(inputElement);
     var selection = $(inputElement).getSelection();
-    var result = "";
-    var lines = selection.text.split("\n");
-    for(var i = 0; i < lines.length; i++) {
-      var line = $.trim(lines[i]);
-      if(line.length > 0) result += (i + 1) + ". " + line + "\n";
-    }
+    // var result = "";
+    // var lines = selection.text.split("\n");
+    // for(var i = 0; i < lines.length; i++) {
+    //   var line = $.trim(lines[i]);
+    //   if(line.length > 0) result += (i + 1) + ". " + line + "\n";
+    // }
 
-    $(inputElement).replaceSelection(result);
+    Weditor.Utils.doList($(inputElement), selection, true, true);
   },
 
   list: function(inputElement) {
@@ -234,6 +241,189 @@ Weditor.Utils = {
 
     return element;
   },
+
+  doAutoindent: function(inputElement, selection, useDefaultText) {
+    var before = $(inputElement).val().substring(0, selection.start);
+    before = before.replace(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]*\n$/, "\n\n");
+    before = before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/, "\n\n");
+    before = before.replace(/(\n|^)[ \t]+\n$/, "\n\n");
+    
+    useDefaultText = false;
+    
+    if(/(\n|^)[ ]{0,3}([*+-])[ \t]+.*\n$/.test(before)){
+      if(Weditor.Utils.doList){
+        Weditor.Utils.doList($(inputElement), selection, false, true);
+      }
+    }
+    if(/(\n|^)[ ]{0,3}(\d+[.])[ \t]+.*\n$/.test(before)){
+      if(Weditor.Utils.doList){
+        Weditor.Utils.doList($(inputElement), selection, true, true);
+      }
+    }
+    // Blockquotes
+    // if(/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(before)){
+    //   if(Weditor.Utils.doBlockquote){
+    //     Weditor.Utils.doBlockquote(chunk, postProcessing, useDefaultText);
+    //   }
+    // }
+  },
+
+  doList: function(inputElement, selection, isNumberedList, useDefaultText) {
+        
+    // These are identical except at the very beginning and end.
+    // Should probably use the regex extension function to make this clearer.
+    var previousItemsRegex = /(\n|^)(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*$/;
+    var nextItemsRegex = /^\n*(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*/;
+    var bullet = "-";
+    var num = 1;
+    var text = selection.text
+    var before = $(inputElement).val().substring(0, selection.start);
+    var after = $(inputElement).val().substring(selection.end, $(inputElement).val().length);
+    
+    // Get the item prefix - e.g. " 1. " for a numbered list, " - " for a bulleted list.
+    var getItemPrefix = function() {
+      var prefix;
+      if(isNumberedList) {
+        prefix = " " + num + ". ";
+        num++;
+      } else{
+        prefix = " " + bullet + " ";
+      }
+      return prefix;
+    };
+    
+    // Fixes the prefixes of the other list items.
+    var getPrefixedItem = function(itemText){
+    
+      // The numbering flag is unset when called by autoindent.
+      if(isNumberedList === undefined){
+        isNumberedList = /^\s*\d/.test(itemText);
+      }
+      
+      // Renumber/bullet the list element.
+      itemText = itemText.replace(/^[ ]{0,3}([*+-]|\d+[.])\s/gm,
+        function( _ ){
+          return getItemPrefix();
+        });
+        
+      return itemText;
+    };
+    
+    var nLinesBefore = 1;
+    
+    before = before.replace(previousItemsRegex,
+      function(itemText){
+        if(/^\s*([*+-])/.test(itemText)){
+          bullet = re.$1;
+        }
+        nLinesBefore = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
+        return getPrefixedItem(itemText);
+      });
+      
+    if(selection.length === 0){
+      text = useDefaultText ? "List item" : " ";
+    }
+    
+    var prefix = getItemPrefix();
+    
+    var nLinesAfter = 1;
+    
+    after = after.replace(nextItemsRegex,
+      function(itemText){
+        nLinesAfter = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
+        return getPrefixedItem(itemText);
+      });
+    
+
+    var spaces = prefix.replace(/./g, " ");
+    $(inputElement).replaceSelection(prefix + $.trim(text).replace(/\n/g, "\n" + spaces));
+    Weditor.Utils.insertAtCursor($(inputElement), selection, prefix + $.trim(text).replace(/\n/g, "\n" + spaces));
+  },
+
+  // doBlockquote: function(chunk, postProcessing, useDefaultText) {
+    
+  //   chunk.selection = chunk.selection.replace(/^(\n*)([^\r]+?)(\n*)$/,
+  //     function(totalMatch, newlinesBefore, text, newlinesAfter){
+  //       chunk.before += newlinesBefore;
+  //       chunk.after = newlinesAfter + chunk.after;
+  //       return text;
+  //     });
+      
+  //   chunk.before = chunk.before.replace(/(>[ \t]*)$/,
+  //     function(totalMatch, blankLine){
+  //       chunk.selection = blankLine + chunk.selection;
+  //       return "";
+  //     });
+    
+  //   var defaultText = useDefaultText ? "Blockquote" : "";
+  //   chunk.selection = chunk.selection.replace(/^(\s|>)+$/ ,"");
+  //   chunk.selection = chunk.selection || defaultText;
+    
+  //   if(chunk.before){
+  //     chunk.before = chunk.before.replace(/\n?$/,"\n");
+  //   }
+  //   if(chunk.after){
+  //     chunk.after = chunk.after.replace(/^\n?/,"\n");
+  //   }
+    
+  //   chunk.before = chunk.before.replace(/(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*$)/,
+  //     function(totalMatch){
+  //       chunk.startTag = totalMatch;
+  //       return "";
+  //     });
+      
+  //   chunk.after = chunk.after.replace(/^(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*)/,
+  //     function(totalMatch){
+  //       chunk.endTag = totalMatch;
+  //       return "";
+  //     });
+    
+  //   var replaceBlanksInTags = function(useBracket){
+      
+  //     var replacement = useBracket ? "> " : "";
+      
+  //     if(chunk.startTag){
+  //       chunk.startTag = chunk.startTag.replace(/\n((>|\s)*)\n$/,
+  //         function(totalMatch, markdown){
+  //           return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
+  //         });
+  //     }
+  //     if(chunk.endTag){
+  //       chunk.endTag = chunk.endTag.replace(/^\n((>|\s)*)\n/,
+  //         function(totalMatch, markdown){
+  //           return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
+  //         });
+  //     }
+  //   };
+    
+  //   if(/^(?![ ]{0,3}>)/m.test(chunk.selection)){
+  //     command.wrap(chunk, wmd.wmd_env.lineLength - 2);
+  //     chunk.selection = chunk.selection.replace(/^/gm, "> ");
+  //     replaceBlanksInTags(true);
+  //     chunk.addBlankLines();
+  //   }
+  //   else{
+  //     chunk.selection = chunk.selection.replace(/^[ ]{0,3}> ?/gm, "");
+  //     command.unwrap(chunk);
+  //     replaceBlanksInTags(false);
+      
+  //     if(!/^(\n|^)[ ]{0,3}>/.test(chunk.selection) && chunk.startTag){
+  //       chunk.startTag = chunk.startTag.replace(/\n{0,2}$/, "\n\n");
+  //     }
+      
+  //     if(!/(\n|^)[ ]{0,3}>.*$/.test(chunk.selection) && chunk.endTag){
+  //       chunk.endTag=chunk.endTag.replace(/^\n{0,2}/, "\n\n");
+  //     }
+  //   }
+    
+  //   if(!/\n/.test(chunk.selection)){
+  //     chunk.selection = chunk.selection.replace(/^(> *)/,
+  //     function(wholeMatch, blanks){
+  //       chunk.startTag += blanks;
+  //       return "";
+  //     });
+  //   }
+  // },
 
   insertAtCursor: function(inputElement, selection, styledText) {
     if(selection.length === 0) {
