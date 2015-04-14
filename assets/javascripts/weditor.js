@@ -180,33 +180,17 @@ Weditor.Actions = {
   },
 
   olist: function(inputElement) {
-    // Figure out what wmd is doing to make showdown recognize ordered list markdown
+    // Figure out what wmd "postprocessing" to figure out how preview shows ol with numbers
     // Figure out how to handle multiple ordered lists per textarea
     Weditor.Utils.selectWholeLines(inputElement);
     var selection = $(inputElement).getSelection();
-    // var result = "";
-    // var lines = selection.text.split("\n");
-    // for(var i = 0; i < lines.length; i++) {
-    //   var line = $.trim(lines[i]);
-    //   if(line.length > 0) result += (i + 1) + ". " + line + "\n";
-    // }
-
     Weditor.Utils.doList($(inputElement), selection, true, true);
   },
 
   list: function(inputElement) {
-    // Figure out what wmd does to make keypress enter add new list line
     Weditor.Utils.selectWholeLines(inputElement);
     var selection = $(inputElement).getSelection();
-    var result = "";
-    var lines = selection.text.split("\n");
-    for(var i = 0; i < lines.length; i++) {
-      var line = $.trim(lines[i]);
-      if(line.length > 0) result += "- " + line + "\n";
-    }
-
-    Weditor.Utils.insertAtCursor($(inputElement), selection, "- List item");
-    $(inputElement).replaceSelection(result);
+    Weditor.Utils.doList($(inputElement), selection, false, true);
   },
 
   pagebreak: function(inputElement) {
@@ -269,75 +253,60 @@ Weditor.Utils = {
   },
 
   doList: function(inputElement, selection, isNumberedList, useDefaultText) {
-        
-    // These are identical except at the very beginning and end.
-    // Should probably use the regex extension function to make this clearer.
     var previousItemsRegex = /(\n|^)(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*$/;
-    var nextItemsRegex = /^\n*(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*/;
     var bullet = "-";
     var num = 1;
     var text = selection.text
     var before = $(inputElement).val().substring(0, selection.start);
     var after = $(inputElement).val().substring(selection.end, $(inputElement).val().length);
     
-    // Get the item prefix - e.g. " 1. " for a numbered list, " - " for a bulleted list.
     var getItemPrefix = function() {
       var prefix;
       if(isNumberedList) {
         prefix = " " + num + ". ";
         num++;
-      } else{
+      } else {
         prefix = " " + bullet + " ";
       }
       return prefix;
     };
     
-    // Fixes the prefixes of the other list items.
-    var getPrefixedItem = function(itemText){
-    
-      // The numbering flag is unset when called by autoindent.
-      if(isNumberedList === undefined){
+    var getPrefixedItem = function(itemText) {
+      if(isNumberedList === undefined) {
         isNumberedList = /^\s*\d/.test(itemText);
       }
-      
-      // Renumber/bullet the list element.
+
       itemText = itemText.replace(/^[ ]{0,3}([*+-]|\d+[.])\s/gm,
-        function( _ ){
+        function(_) {
           return getItemPrefix();
         });
         
       return itemText;
     };
-    
-    var nLinesBefore = 1;
-    
+
     before = before.replace(previousItemsRegex,
       function(itemText){
-        if(/^\s*([*+-])/.test(itemText)){
-          bullet = re.$1;
-        }
-        nLinesBefore = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
+        var nLinesBefore = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
         return getPrefixedItem(itemText);
       });
       
-    if(selection.length === 0){
+    if(selection.length === 0) {
       text = useDefaultText ? "List item" : " ";
     }
-    
-    var prefix = getItemPrefix();
-    
-    var nLinesAfter = 1;
-    
-    after = after.replace(nextItemsRegex,
-      function(itemText){
-        nLinesAfter = /[^\n]\n\n[^\n]/.test(itemText) ? 1 : 0;
-        return getPrefixedItem(itemText);
-      });
-    
 
-    var spaces = prefix.replace(/./g, " ");
-    $(inputElement).replaceSelection(prefix + $.trim(text).replace(/\n/g, "\n" + spaces));
-    Weditor.Utils.insertAtCursor($(inputElement), selection, prefix + $.trim(text).replace(/\n/g, "\n" + spaces));
+    var result = [];
+    var lines = text.split("\n");
+
+    lines.forEach(function(line) {
+      line = $.trim(line);
+      var prefix = getItemPrefix();
+      var spaces = prefix.replace(/./g, " ");
+      if(line.length > 0) result.push((prefix) + line.replace(/\n/g, "\n" + spaces));
+    });
+
+    result = result.toString().replace(/,/g, "\n");
+    $(inputElement).replaceSelection(result);
+    Weditor.Utils.insertAtCursor($(inputElement), selection, result);
   },
 
   // doBlockquote: function(chunk, postProcessing, useDefaultText) {
