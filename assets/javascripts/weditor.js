@@ -83,7 +83,7 @@ function Weditor(inputElement) {
   this.activateControls = function( controlsElement ){
     var _self = this;
     ["bold", "italic", "link", "quotes", "title", "olist", "list", "pagebreak", "undo", "redo"].forEach( function( actionName ){
-      $( controlsElement ).find( ".mdm-" + actionName ).click( function( event ){ _self.action( actionName, event ) } );
+      $(controlsElement ).find( ".mdm-" + actionName ).click( function( event ){ _self.action( actionName, event ) } );
     });
   };
 
@@ -115,7 +115,7 @@ function Weditor(inputElement) {
   this.updatePreview = function(){
     var converter = new Attacklab.showdown.converter();
     $( this.previewElement ).html(
-      converter.makeHtml( $( this.inputElement ).val().replace(/</g,'&lt;').replace(/>/g,'&gt;') )
+      converter.makeHtml( $( this.inputElement ).val())
     );
   };
 
@@ -157,12 +157,10 @@ Weditor.Actions = {
   },
 
   quotes: function(inputElement) {
-    alert("Blockquotes are not yet functional");
-    // Figure out what wmd "postprocessing" doing to make showdown recognize blockquote markdown
-    // Weditor.Utils.selectWholeLines(inputElement);
-    // var selection = $(inputElement).getSelection();
-    // Weditor.Utils.doBlockquote($(inputElement), selection, true)
-    // Weditor.Utils.refreshPreview($(inputElement));
+    Weditor.Utils.selectWholeLines(inputElement);
+    var selection = $(inputElement).getSelection();
+    Weditor.Utils.doBlockquote($(inputElement), selection, true)
+    Weditor.Utils.refreshPreview($(inputElement));
   },
 
   title: function(inputElement){
@@ -250,6 +248,8 @@ Weditor.Utils = {
         Weditor.Utils.doBlockquote($(inputElement), selection, true);
       }
     }
+
+    Weditor.Utils.refreshPreview($(inputElement));
   },
 
   doList: function(inputElement, selection, isNumberedList, useDefaultText) {
@@ -418,7 +418,8 @@ Weditor.Utils = {
   refreshPreview: function(inputElement) {
     var converter = new Attacklab.showdown.converter();
     var preview = $(inputElement).parent().next();
-    $(preview).html(converter.makeHtml($(inputElement).val().replace(/</g,'&lt;').replace(/>/g,'&gt;')));
+
+    $(preview).html(converter.makeHtml($(inputElement).val()));
   },
 
   addEvent: function(elem, event, listener) {
