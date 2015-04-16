@@ -88,7 +88,7 @@ function Weditor(inputElement) {
   };
 
   this.activatePreview = function( inputElement, previewElement ) {
-    $(inputElement).keyup( $.proxy( this.updatePreview, this ) );
+    $(inputElement).keyup($.proxy(this.updatePreview, this));
   };
 
   this.activateInput = function( inputElement, controlsElement, previewElement ){
@@ -173,8 +173,6 @@ Weditor.Actions = {
   },
 
   olist: function(inputElement) {
-    // Figure out what wmd "postprocessing" to figure out how preview shows ol with numbers
-    // Figure out how to handle multiple ordered lists per textarea
     Weditor.Utils.selectWholeLines(inputElement);
     var selection = $(inputElement).getSelection();
     Weditor.Utils.doList($(inputElement), selection, true, true);
