@@ -383,7 +383,6 @@ Weditor.Utils = {
 
   insertAtCursor: function(inputElement, selection, styledText) {
     if(selection.start === selection.end) {
-      console.log("HEEEEEY")
       var styledInput = $(inputElement).val().substring(0, selection.start) + styledText + 
                         $(inputElement).val().substring(selection.end);
       $(inputElement).val(styledInput);
