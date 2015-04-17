@@ -70,7 +70,6 @@ function Weditor(inputElement) {
       if (!key.shiftKey && !key.ctrlKey && !key.metaKey) {
         var keyCode = key.charCode || key.keyCode;
         if (keyCode === 13) {
-          console.log("Enter pressed")
           Weditor.Utils.doAutoindent($(inputElement), $(inputElement).caret());
         }
       }
