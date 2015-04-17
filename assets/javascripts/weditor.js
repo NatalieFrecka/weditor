@@ -1,8 +1,6 @@
 function Weditor(inputElement) {
   this.inputElement = inputElement;
 
-  var keyEvent = "keydown";
-
   this.initialize = function(){
     this.controlsElement = Weditor.Utils.appendControls(inputElement);
     this.previewElement  = Weditor.Utils.appendPreview(inputElement);
@@ -13,7 +11,7 @@ function Weditor(inputElement) {
 
     this.updatePreview();
 
-    Weditor.Utils.addEvent(this.inputElement, keyEvent, function(key){
+    Weditor.Utils.addEvent(this.inputElement, "keydown", function(key){
       if (key.ctrlKey || key.metaKey) {
         var keyCode = key.charCode || key.keyCode;
         var keyCodeStr = String.fromCharCode(keyCode).toLowerCase();
@@ -72,6 +70,7 @@ function Weditor(inputElement) {
       if (!key.shiftKey && !key.ctrlKey && !key.metaKey) {
         var keyCode = key.charCode || key.keyCode;
         if (keyCode === 13) {
+          console.log("Enter pressed")
           Weditor.Utils.doAutoindent($(inputElement), $(inputElement).caret());
         }
       }
@@ -112,6 +111,7 @@ function Weditor(inputElement) {
     });
   };
 
+// Test this
   this.updatePreview = function(){
     var converter = new Attacklab.showdown.converter();
     $( this.previewElement ).html(
