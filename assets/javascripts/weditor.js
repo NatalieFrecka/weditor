@@ -249,8 +249,6 @@ Weditor.Utils = {
     before = before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/, "\n\n");
     before = before.replace(/(\n|^)[ \t]+\n$/, "\n\n");
     
-    useDefaultText = false;
-    
     if(/(\n|^)[ ]{0,3}([*+-])[ \t]+.*\n$/.test(before)){
       if(Weditor.Utils.doList){
         Weditor.Utils.doList($(inputElement), selection, false, true);
@@ -267,6 +265,7 @@ Weditor.Utils = {
         Weditor.Utils.doBlockquote($(inputElement), selection, true);
       }
     }
+
 
     Weditor.Utils.refreshPreview($(inputElement));
   },
@@ -323,6 +322,7 @@ Weditor.Utils = {
 
     selection.text = result.toString().replace(/,/g, "\n");
     Weditor.Utils.replaceSelection(inputElement, selection);
+    Weditor.Utils.insertAtCursor(inputElement, selection, selection.text);
   },
 
   doBlockquote: function(inputElement, selection, useDefaultText) {
@@ -378,6 +378,7 @@ Weditor.Utils = {
 
     selection.text = startTag + chunkText + endTag;
     Weditor.Utils.replaceSelection(inputElement, selection);
+    Weditor.Utils.insertAtCursor(inputElement, selection, selection.text);
   },
 
   insertAtCursor: function(inputElement, selection, styledText) {
@@ -444,9 +445,8 @@ Weditor.Utils = {
   addEvent: function(elem, event, listener) {
     if (elem.attachEvent) {
       elem.attachEvent("on" + event, listener);
-    }
-    else {
-      elem.addEventListener(event, listener, false);
+    } else {
+      $(elem).on(event, listener);
     }
   }
 }

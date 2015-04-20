@@ -378,6 +378,45 @@ describe("Weditor", function() {
                     });
                 });
             });
+
+            describe("when enter is pressed", function() {
+                var keypress = $.Event('keyup');
+                keypress.keyCode = 13;
+
+                describe("auotindent blockquotes", function() {
+
+                    beforeEach(function() {
+                        $("#it").val("> Blockquote\n");
+                        $('#it').trigger(keypress);
+                    });
+
+                    it("should add second line of default blockquote text", function() {
+                        expect($("#it").val()).toBe("> Blockquote\n> Blockquote");
+                    });
+                });
+
+                describe("autoindent ordered lists", function() {
+                    beforeEach(function() {
+                        $("#it").val(" 1. List item\n");
+                        $("#it").trigger(keypress);
+                    });
+
+                    it("it should add a second ordered list item", function() {
+                        expect($("#it").val()).toBe(" 1. List item\n 2. List item");
+                    });
+                });
+
+                describe("autoindent unordered lists", function() {
+                    beforeEach(function() {
+                        $("#it").val(" - List item\n");
+                        $("#it").trigger(keypress);
+                    });
+
+                    it("it should add a second ordered list item", function() {
+                        expect($("#it").val()).toBe(" - List item\n - List item");
+                    });
+                });
+            });
         });
     });
 });

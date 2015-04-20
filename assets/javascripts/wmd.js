@@ -2193,7 +2193,6 @@ Attacklab.wmdBase = function(){
 		var spaces = prefix.replace(/./g, " ");
 		command.wrap(chunk, wmd.wmd_env.lineLength - spaces.length);
 		chunk.selection = chunk.selection.replace(/\n/g, "\n" + spaces);
-		
 	};
 	
 	command.doHeading = function(chunk, postProcessing, useDefaultText){
