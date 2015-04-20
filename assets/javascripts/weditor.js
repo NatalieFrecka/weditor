@@ -130,6 +130,7 @@ Weditor.Actions = {
       var text = $.trim(selection.text) || "strong text"
       selection.text = "**" + text + "**";
       Weditor.Utils.replaceSelection(inputElement, selection);
+      Weditor.Utils.setSelection(inputElement, selection, 2, 2);
       Weditor.Utils.refreshPreview(inputElement);
    },
 
@@ -139,6 +140,7 @@ Weditor.Actions = {
       var text = $.trim(selection.text) || "italic text"
       selection.text = "*" + text + "*"
       Weditor.Utils.replaceSelection(inputElement, selection);
+      Weditor.Utils.setSelection(inputElement, selection, 1, 1);
       Weditor.Utils.refreshPreview(inputElement);
    },
 
@@ -150,9 +152,11 @@ Weditor.Actions = {
       var postfix = "\n[" + linkNumber + "]: " + link
       if(link) {
          var text = $.trim(selection.text) || "link text"
+         var endTagLength = linkNumber.toString().length + 3;
          selection.text = "[" + text + "][" + linkNumber + "]"
          Weditor.Utils.replaceSelection(inputElement, selection);
          inputElement.val(inputElement.val() + postfix);
+         Weditor.Utils.setSelection(inputElement, selection, 1, endTagLength)
          Weditor.Utils.refreshPreview(inputElement);
       }
    },
@@ -173,7 +177,9 @@ Weditor.Actions = {
       selection.text = selection.text || defaultText;
       var hash = (selection.text.charAt( 0 ) == "#") ? "#" : "# ";
       selection.text = hash + selection.text;
+      var startTagLength = (selection.text.match(/#/g) || []).length + 1;
       Weditor.Utils.replaceSelection(inputElement, selection);
+      Weditor.Utils.setSelection(inputElement, selection, startTagLength, 0);
       Weditor.Utils.refreshPreview(inputElement);
    },
 
@@ -230,9 +236,16 @@ Weditor.Utils = {
    },
 
    replaceSelection: function(inputElement, selection) {
-      var before = $(inputElement).val().substring(0, selection.start);
-      var after = $(inputElement).val().substring(selection.end);
+      var before = inputElement.val().substring(0, selection.start);
+      var after = inputElement.val().substring(selection.end);
       $(inputElement).val(before + selection.text + after);
+   },
+
+   setSelection: function(inputElement, selection, startTagLength, endTagLength) {
+      var start = selection.start + startTagLength;
+      var end = selection.start + selection.text.length - endTagLength;
+
+      inputElement.setSelection(start, end);
    },
 
    doAutoindent: function(inputElement, selection) {
@@ -270,6 +283,7 @@ Weditor.Utils = {
       var text = selection.text;
       var defaultText = useDefaultText ? "List item" : " ";
       var before = inputElement.val().substring(0, selection.start);
+      var startTagLength = isNumberedList ? 4: 3;
 
       var getItemPrefix = function() {
          var prefix;
@@ -316,6 +330,7 @@ Weditor.Utils = {
 
       selection.text = result.toString().replace(/,/g, "\n");
       Weditor.Utils.replaceSelection(inputElement, selection);
+      Weditor.Utils.setSelection(inputElement, selection, startTagLength, 0)
    },
 
    doBlockquote: function(inputElement, selection, useDefaultText) {
@@ -371,6 +386,7 @@ Weditor.Utils = {
 
       selection.text = startTag + chunkText + endTag;
       Weditor.Utils.replaceSelection(inputElement, selection);
+      Weditor.Utils.setSelection(inputElement, selection, 2, 0);
    },
 
    selectWholeLines: function(inputElement, selection) {

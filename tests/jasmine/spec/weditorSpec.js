@@ -42,6 +42,7 @@ describe("Weditor", function() {
 
       describe("clicking the preview box", function() {
          beforeEach(function() {
+            spyOn(jQuery.fn, "setSelection");
             $(".mdm-preview").click();
          });
 
@@ -84,6 +85,10 @@ describe("Weditor", function() {
             it("should update the preview div", function() {
                expect($(".mdm-preview").html()).toBe("<p><strong>strong text</strong></p>");
             });
+
+            it("should call setSelection with the correct args", function() {
+               expect(jQuery.fn.setSelection).toHaveBeenCalledWith(2, 13);
+            });
          });
 
          describe("when Italics button is clicked with no selection", function() {
@@ -97,6 +102,10 @@ describe("Weditor", function() {
 
             it("should update the preview div", function() {
                expect($(".mdm-preview").html()).toBe("<p><em>italic text</em></p>");
+            });
+
+            it("should call setSelection with the correct args", function() {
+               expect(jQuery.fn.setSelection).toHaveBeenCalledWith(1, 12);
             });
          });
 
@@ -114,6 +123,10 @@ describe("Weditor", function() {
                expect($(".mdm-preview").html()).toBe('<p><a href="http://www.google.com">link text</a></p>');
             });
 
+            it("should call setSelection with the correct args", function() {
+               expect(jQuery.fn.setSelection).toHaveBeenCalledWith(1, 10);
+            });
+
             describe("when a second link is added", function() {
                beforeEach(function() {
                   spyOn(jQuery.fn, "caret").and.returnValue({start: 14, end: 14, text: ""});
@@ -122,6 +135,10 @@ describe("Weditor", function() {
 
                it("should insert the default link text at cursor", function() {
                   expect($("#it").val()).toBe("[link text][1][link text][2]\n[1]: http://www.google.com\n[2]: http://www.google.com");
+               });
+
+               it("should update the preview div", function() {
+                  expect($(".mdm-preview").html()).toBe('<p><a href="http://www.google.com">link text</a><a href="http://www.google.com">link text</a></p>');
                });
             });
          });
@@ -138,6 +155,10 @@ describe("Weditor", function() {
             it("should update the preview div", function() {
                expect($(".mdm-preview").html()).toBe("<blockquote>\n  <p>Blockquote</p>\n</blockquote>");
             });
+
+            it("should call setSelection with the correct args", function() {
+               expect(jQuery.fn.setSelection).toHaveBeenCalledWith(2, 12);
+            });
          });
 
          describe("when Ordered List button is clicked with no selection", function() {
@@ -152,6 +173,26 @@ describe("Weditor", function() {
             it("should update the preview div", function() {
                expect($(".mdm-preview").html()).toBe('<ol>\n<li>List item</li>\n</ol>');
             });
+
+            it("should call setSelection with the correct args", function() {
+               expect(jQuery.fn.setSelection).toHaveBeenCalledWith(4, 13);
+            });
+
+            describe("a second list item is added", function() {
+               beforeEach(function() {
+                  spyOn(jQuery.fn, "caret").and.returnValue({start: 14, end: 14, text: ""});
+                  $("#it").val($("#it").val() + "\n");
+                  $(".mdm-olist").click();
+               });
+
+               it("should add a second list item with the correct prefix", function() {
+                  expect($("#it").val()).toBe(" 1. List item\n 2. List item");
+               });
+
+               it("should update the preview div", function() {
+                  expect($(".mdm-preview").html()).toBe('<ol>\n<li>List item</li>\n<li>List item</li>\n</ol>');
+               });
+            });
          });
 
          describe("when Unordered List button is clicked with no selection", function() {
@@ -165,6 +206,26 @@ describe("Weditor", function() {
 
             it("should update the preview div", function() {
                expect($(".mdm-preview").html()).toBe('<ul>\n<li>List item</li>\n</ul>');
+            });
+
+            it("should call setSelection with the correct args", function() {
+               expect(jQuery.fn.setSelection).toHaveBeenCalledWith(3, 12);
+            });
+
+            describe("a second list item is added", function() {
+               beforeEach(function() {
+                  spyOn(jQuery.fn, "caret").and.returnValue({start: 13, end: 13, text: ""});
+                  $("#it").val($("#it").val() + "\n");
+                  $(".mdm-list").click();
+               });
+
+               it("should add a second list item with the correct prefix", function() {
+                  expect($("#it").val()).toBe(" - List item\n - List item");
+               });
+
+               it("should update the preview div", function() {
+                  expect($(".mdm-preview").html()).toBe('<ul>\n<li>List item</li>\n<li>List item</li>\n</ul>');
+               });
             });
          });
 
@@ -181,6 +242,10 @@ describe("Weditor", function() {
                expect($(".mdm-preview").html()).toBe('<h1>Heading</h1>');
             });
 
+            it("should call setSelection with the correct args", function() {
+               expect(jQuery.fn.setSelection).toHaveBeenCalledWith(2, 9);
+            });
+
             describe("when Title button is clicked second time", function() {
                beforeEach(function() {
                   $(".mdm-title").click();
@@ -192,6 +257,10 @@ describe("Weditor", function() {
 
                it("should update the preview div", function() {
                   expect($(".mdm-preview").html()).toBe('<h2>Heading</h2>');
+               });
+
+               it("should call setSelection with the correct args", function() {
+                  expect(jQuery.fn.setSelection).toHaveBeenCalledWith(3, 10);
                });
             });
          });
@@ -228,6 +297,10 @@ describe("Weditor", function() {
                it("should update the preview div", function() {
                   expect($(".mdm-preview").html()).toBe('<p><strong>Default Text</strong> not selected</p>');
                });
+
+               it("should call setSelection with the correct args", function() {
+                  expect(jQuery.fn.setSelection).toHaveBeenCalledWith(2, 14);
+               });
             });
 
             describe("when Italics button is clicked", function() {
@@ -241,6 +314,10 @@ describe("Weditor", function() {
 
                it("should update the preview div", function() {
                   expect($(".mdm-preview").html()).toBe('<p><em>Default Text</em> not selected</p>');
+               });
+
+               it("should call setSelection with the correct args", function() {
+                  expect(jQuery.fn.setSelection).toHaveBeenCalledWith(1, 13);
                });
             });
 
@@ -257,6 +334,10 @@ describe("Weditor", function() {
                it("should update the preview div", function() {
                   expect($(".mdm-preview").html()).toBe('<p><a href="http://www.google.com">Default Text</a> not selected</p>');
                });
+
+               it("should call setSelection with the correct args", function() {
+                  expect(jQuery.fn.setSelection).toHaveBeenCalledWith(1, 13);
+               });
             });
 
             describe("when Quotes button is clicked", function() {
@@ -270,6 +351,10 @@ describe("Weditor", function() {
 
                it("should update the preview div", function() {
                   expect($(".mdm-preview").html()).toBe('<blockquote>\n  <p>Default Text not selected</p>\n</blockquote>');
+               });
+
+               it("should call setSelection with the correct args", function() {
+                  expect(jQuery.fn.setSelection).toHaveBeenCalledWith(2, 27);
                });
             });
 
@@ -285,6 +370,10 @@ describe("Weditor", function() {
                it("should update the preview div", function() {
                   expect($(".mdm-preview").html()).toBe('<ol>\n<li>Default Text not selected</li>\n</ol>');
                });
+
+               it("should call setSelection with the correct args", function() {
+                  expect(jQuery.fn.setSelection).toHaveBeenCalledWith(4, 29);
+               });
             });
 
             describe("when Unordered List button is clicked", function() {
@@ -298,6 +387,10 @@ describe("Weditor", function() {
 
                it("should update the preview div", function() {
                   expect($(".mdm-preview").html()).toBe('<ul>\n<li>Default Text not selected</li>\n</ul>');
+               });
+
+               it("should call setSelection with the correct args", function() {
+                  expect(jQuery.fn.setSelection).toHaveBeenCalledWith(3, 28);
                });
             });
 
@@ -314,6 +407,10 @@ describe("Weditor", function() {
                   expect($(".mdm-preview").html()).toBe('<h1>Default Text not selected</h1>');
                });
 
+               it("should call setSelection with the correct args", function() {
+                  expect(jQuery.fn.setSelection).toHaveBeenCalledWith(2, 27);
+               });
+
                describe("when Title button is clicked second time", function() {
                   beforeEach(function() {
                      $(".mdm-title").click();
@@ -325,6 +422,10 @@ describe("Weditor", function() {
 
                   it("should update the preview div", function() {
                      expect($(".mdm-preview").html()).toBe('<h2>Default Text not selected</h2>');
+                  });
+
+                  it("should call setSelection with the correct args", function() {
+                     expect(jQuery.fn.setSelection).toHaveBeenCalledWith(3, 28);
                   });
                });
             });
