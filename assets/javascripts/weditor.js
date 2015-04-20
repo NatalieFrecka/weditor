@@ -18,38 +18,38 @@ function Weditor(inputElement) {
         
         switch(keyCodeStr) {
           case "b":
-            Weditor.Actions.bold($(inputElement));
+            Weditor.Actions.bold(inputElement);
             break;
           case "i":
-            Weditor.Actions.italic($(inputElement));
+            Weditor.Actions.italic(inputElement);
             break;
           case "l":
-            Weditor.Actions.link($(inputElement));
+            Weditor.Actions.link(inputElement);
             break;
           case "q":
-            Weditor.Actions.quotes($(inputElement));
+            Weditor.Actions.quotes(inputElement);
             break;
           case "o":
-            Weditor.Actions.olist($(inputElement));
+            Weditor.Actions.olist(inputElement);
             break;
           case "u":
-            Weditor.Actions.list($(inputElement));
+            Weditor.Actions.list(inputElement);
             break;
           case "h":
-            Weditor.Actions.title($(inputElement));
+            Weditor.Actions.title(inputElement);
             break;
           case "r":
-            Weditor.Actions.pagebreak($(inputElement));
+            Weditor.Actions.pagebreak(inputElement);
             break;
           case "y":
-            Weditor.Actions.redo($(inputElement));
+            Weditor.Actions.redo(inputElement);
             break;
           case "z":
             if(key.shiftKey) {
-              Weditor.Actions.redo($(inputElement));
+              Weditor.Actions.redo(inputElement);
             }
             else {
-              Weditor.Actions.undo($(inputElement));
+              Weditor.Actions.undo(inputElement);
             }
             break;
           default:

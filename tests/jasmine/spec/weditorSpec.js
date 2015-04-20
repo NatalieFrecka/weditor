@@ -417,6 +417,159 @@ describe("Weditor", function() {
                     });
                 });
             });
+
+            describe("shortcut keypress events", function() {
+                var keypress = $.Event('keydown');
+                keypress.metaKey = true;
+
+                describe("bold shortcut", function() {
+                    beforeEach(function() {
+                        spyOn(Weditor.Actions, "bold");
+                        keypress.keyCode = 66;
+                        $("#it").trigger(keypress);
+                    });
+
+                    it("should call the bold action", function() {
+                        expect(Weditor.Actions.bold).toHaveBeenCalled();
+                    });
+                });
+
+                describe("italic shortcut", function() {
+                    beforeEach(function() {
+                        spyOn(Weditor.Actions, "italic");
+                        keypress.keyCode = 73;
+                        $("#it").trigger(keypress);
+                    });
+
+                    it("should call the italic action", function() {
+                        expect(Weditor.Actions.italic).toHaveBeenCalled();
+                    });
+                });
+
+                describe("link shortcut", function() {
+                    beforeEach(function() {
+                        spyOn(Weditor.Actions, "link");
+                        keypress.keyCode = 76;
+                        $("#it").trigger(keypress);
+                    });
+
+                    it("should call the link action", function() {
+                        expect(Weditor.Actions.link).toHaveBeenCalled();
+                    });
+                });
+
+                describe("blockquotes shortcut", function() {
+                    beforeEach(function() {
+                        spyOn(Weditor.Actions, "quotes");
+                        keypress.keyCode = 81;
+                        $("#it").trigger(keypress);
+                    });
+
+                    it("should call the quotes action", function() {
+                        expect(Weditor.Actions.quotes).toHaveBeenCalled();
+                    });
+                });
+
+                describe("ordered list shortcut", function() {
+                    beforeEach(function() {
+                        spyOn(Weditor.Actions, "olist");
+                        keypress.keyCode = 79;
+                        $("#it").trigger(keypress);
+                    });
+
+                    it("should call the ordered list action", function() {
+                        expect(Weditor.Actions.olist).toHaveBeenCalled();
+                    });
+                });
+
+                describe("unordered list shortcut", function() {
+                    beforeEach(function() {
+                        spyOn(Weditor.Actions, "list");
+                        keypress.keyCode = 85;
+                        $("#it").trigger(keypress);
+                    });
+
+                    it("should call the unordered list action", function() {
+                        expect(Weditor.Actions.list).toHaveBeenCalled();
+                    });
+                });
+
+                describe("unordered list shortcut", function() {
+                    beforeEach(function() {
+                        spyOn(Weditor.Actions, "list");
+                        keypress.keyCode = 85;
+                        $("#it").trigger(keypress);
+                    });
+
+                    it("should call the unordered list action", function() {
+                        expect(Weditor.Actions.list).toHaveBeenCalled();
+                    });
+                });
+
+                describe("title shortcut", function() {
+                    beforeEach(function() {
+                        spyOn(Weditor.Actions, "title");
+                        keypress.keyCode = 72;
+                        $("#it").trigger(keypress);
+                    });
+
+                    it("should call the title action", function() {
+                        expect(Weditor.Actions.title).toHaveBeenCalled();
+                    });
+                });
+
+                describe("pagebreak shortcut", function() {
+                    beforeEach(function() {
+                        spyOn(Weditor.Actions, "pagebreak");
+                        keypress.keyCode = 82;
+                        $("#it").trigger(keypress);
+                    });
+
+                    it("should call the pagebreak action", function() {
+                        expect(Weditor.Actions.pagebreak).toHaveBeenCalled();
+                    });
+                });
+
+                describe("redo shortcut", function() {
+                    beforeEach(function() {
+                        spyOn(window, 'alert').and.returnValue(true);
+                        spyOn(Weditor.Actions, "redo");
+                        keypress.keyCode = 89;
+                        $("#it").trigger(keypress);
+                    });
+
+                    it("should call the redo action", function() {
+                        expect(Weditor.Actions.redo).toHaveBeenCalled();
+                    });
+                });
+
+                describe("undo shortcut", function() {
+                    beforeEach(function() {
+                        spyOn(window, 'alert').and.returnValue(true);
+                        spyOn(Weditor.Actions, "undo");
+                        keypress.keyCode = 90;
+                        $("#it").trigger(keypress);
+                    });
+
+                    it("should call the undo action", function() {
+                        expect(Weditor.Actions.undo).toHaveBeenCalled();
+                    });
+                });
+
+                describe("alternate redo shortcut", function() {
+                    beforeEach(function() {
+                        spyOn(window, 'alert').and.returnValue(true);
+                        spyOn(Weditor.Actions, "redo");
+                        keypress.shiftKey = true;
+                        keypress.keyCode = 90;
+                        $("#it").trigger(keypress);
+                    });
+
+                    it("should call the undo action", function() {
+                        expect(Weditor.Actions.redo).toHaveBeenCalled();
+                    });
+                });
+            });
         });
     });
 });
