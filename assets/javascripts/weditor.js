@@ -372,7 +372,7 @@ Weditor.Utils = {
       selection.text = startTag + chunkText + endTag;
       Weditor.Utils.replaceSelection(inputElement, selection);
    },
-   
+
    selectWholeLines: function(inputElement, selection) {
       var content = inputElement.val();
       var iniPosition = (selection.start > 0) ? (selection.start - 1) : 0;

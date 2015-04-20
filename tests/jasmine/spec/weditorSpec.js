@@ -114,9 +114,16 @@ describe("Weditor", function() {
                expect($(".mdm-preview").html()).toBe('<p><a href="http://www.google.com">link text</a></p>');
             });
 
-            // describe("when a second link is added", function() {
-            //    // DO THIS
-            // });
+            describe("when a second link is added", function() {
+               beforeEach(function() {
+                  spyOn(jQuery.fn, "caret").and.returnValue({start: 14, end: 14, text: ""});
+                  $(".mdm-link").click();
+               });
+
+               it("should insert the default link text at cursor", function() {
+                  expect($("#it").val()).toBe("[link text][1][link text][2]\n[1]: http://www.google.com\n[2]: http://www.google.com");
+               });
+            });
          });
 
          describe("when Quotes button is clicked with no selection", function() {
