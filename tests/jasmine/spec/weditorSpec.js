@@ -113,6 +113,10 @@ describe("Weditor", function() {
             it("should update the preview div", function() {
                expect($(".mdm-preview").html()).toBe('<p><a href="http://www.google.com">link text</a></p>');
             });
+
+            // describe("when a second link is added", function() {
+            //    // DO THIS
+            // });
          });
 
          describe("when Quotes button is clicked with no selection", function() {

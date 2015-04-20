@@ -127,18 +127,18 @@ Weditor.Actions = {
    bold: function(inputElement) {
       var inputElement = $(inputElement);
       var selection = inputElement.caret();
-      selection.text = "**" + $.trim(selection.text) + "**";
+      var text = $.trim(selection.text) || "strong text"
+      selection.text = "**" + text + "**";
       Weditor.Utils.replaceSelection(inputElement, selection);
-      Weditor.Utils.insertAtCursor(inputElement, selection, "**strong text**");
       Weditor.Utils.refreshPreview(inputElement);
    },
 
    italic: function(inputElement) {
       var inputElement = $(inputElement);
       var selection = inputElement.caret();
-      selection.text = "*" + $.trim(selection.text) + "*"
+      var text = $.trim(selection.text) || "italic text"
+      selection.text = "*" + text + "*"
       Weditor.Utils.replaceSelection(inputElement, selection);
-      Weditor.Utils.insertAtCursor(inputElement, selection, "*italic text*");
       Weditor.Utils.refreshPreview(inputElement);
    },
 
@@ -149,9 +149,9 @@ Weditor.Actions = {
       var linkNumber = inputElement.parent().next().children().first().children("a").size() + 1;
       var postfix = "\n[" + linkNumber + "]: " + link
       if(link) {
-         selection.text = "[" + $.trim(selection.text) + "][" + linkNumber + "]"
+         var text = $.trim(selection.text) || "link text"
+         selection.text = "[" + text + "][" + linkNumber + "]"
          Weditor.Utils.replaceSelection(inputElement, selection);
-         Weditor.Utils.insertAtCursor(inputElement, selection, "[link text][" + linkNumber + "]");
          inputElement.val(inputElement.val() + postfix);
          Weditor.Utils.refreshPreview(inputElement);
       }
@@ -198,7 +198,6 @@ Weditor.Actions = {
       var selection = inputElement.caret();
       selection.text = "\n\n----------\n";
       Weditor.Utils.replaceSelection(inputElement, selection);
-      Weditor.Utils.insertAtCursor(inputElement, selection, selection.text);
       Weditor.Utils.refreshPreview(inputElement);
    },
 
@@ -231,11 +230,9 @@ Weditor.Utils = {
    },
 
    replaceSelection: function(inputElement, selection) {
-      if(selection.start != selection.end) {
-         var before = $(inputElement).val().substring(0, selection.start);
-         var after = $(inputElement).val().substring(selection.end);
-         $(inputElement).val(before + selection.text + after);
-      }
+      var before = $(inputElement).val().substring(0, selection.start);
+      var after = $(inputElement).val().substring(selection.end);
+      $(inputElement).val(before + selection.text + after);
    },
 
    doAutoindent: function(inputElement, selection) {
@@ -319,7 +316,6 @@ Weditor.Utils = {
 
       selection.text = result.toString().replace(/,/g, "\n");
       Weditor.Utils.replaceSelection(inputElement, selection);
-      Weditor.Utils.insertAtCursor(inputElement, selection, selection.text);
    },
 
    doBlockquote: function(inputElement, selection, useDefaultText) {
@@ -375,17 +371,8 @@ Weditor.Utils = {
 
       selection.text = startTag + chunkText + endTag;
       Weditor.Utils.replaceSelection(inputElement, selection);
-      Weditor.Utils.insertAtCursor(inputElement, selection, selection.text);
    },
-
-   insertAtCursor: function(inputElement, selection, styledText) {
-      if(selection.start === selection.end) {
-         var styledInput = $(inputElement).val().substring(0, selection.start) + styledText + 
-                           $(inputElement).val().substring(selection.end);
-         $(inputElement).val(styledInput);
-      }
-   },
-
+   
    selectWholeLines: function(inputElement, selection) {
       var content = inputElement.val();
       var iniPosition = (selection.start > 0) ? (selection.start - 1) : 0;
