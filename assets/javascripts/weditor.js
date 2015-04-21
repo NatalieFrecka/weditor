@@ -178,7 +178,7 @@ Weditor.Actions = {
 }
 
 Weditor.ExtendedActions = {
-      doBlockquote: function(inputElement, selection, useDefaultText) {
+   doBlockquote: function(inputElement, selection, useDefaultText) {
       var before = inputElement.val().substring(0, selection.start);
       var after = inputElement.val().substring(selection.end);
       var chunkText = selection.text.replace(/^(\s|>)+$/ ,"");
