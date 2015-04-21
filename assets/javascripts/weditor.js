@@ -1,9 +1,9 @@
 function Weditor(inputElement) {
-   this.inputElement = inputElement;
+   this.inputElement = $(inputElement);
 
    this.initialize = function() {
-      this.controlsElement = Weditor.Utils.appendControls(inputElement);
-      this.previewElement  = Weditor.Utils.appendPreview(inputElement);
+      this.controlsElement = Weditor.ControlsManager.appendControls(inputElement);
+      this.previewElement  = Weditor.PreviewManager.appendPreview(inputElement);
 
       this.activatePreview(this.inputElement, this.previewElement);
       this.activateControls(this.controlsElement);
@@ -95,14 +95,14 @@ function Weditor(inputElement) {
          _self.click_on_control = true;
       });
 
-      $(previewElement).click( function() {
+      $(previewElement).click(function() {
          _self.click_on_control = false;
          $(this).prev().slideDown();
          $(inputElement).focus();
          $(inputElement).select();
       });
 
-      $(inputElement).blur( function() {
+      $(inputElement).blur(function() {
          if (!_self.click_on_control) {
             $(this).parent().slideUp();
          }
@@ -131,7 +131,6 @@ Weditor.Actions = {
       selection.text = "**" + text + "**";
       Weditor.Utils.replaceSelection(inputElement, selection);
       Weditor.Utils.setSelection(inputElement, selection, 2, 2);
-      Weditor.Utils.refreshPreview(inputElement);
    },
 
    italic: function(inputElement) {
@@ -141,7 +140,6 @@ Weditor.Actions = {
       selection.text = "*" + text + "*"
       Weditor.Utils.replaceSelection(inputElement, selection);
       Weditor.Utils.setSelection(inputElement, selection, 1, 1);
-      Weditor.Utils.refreshPreview(inputElement);
    },
 
    link: function(inputElement) {
@@ -149,15 +147,14 @@ Weditor.Actions = {
       var selection = inputElement.caret();
       var link = prompt( "Link to URL", "http://" );
       var linkNumber = inputElement.parent().next().children().first().children("a").size() + 1;
-      var postfix = "\n[" + linkNumber + "]: " + link
+      var postfix = "\n[" + linkNumber + "]: " + link;
       if(link) {
-         var text = $.trim(selection.text) || "link text"
+         var text = $.trim(selection.text) || "link text";
          var endTagLength = linkNumber.toString().length + 3;
-         selection.text = "[" + text + "][" + linkNumber + "]"
+         selection.text = "[" + text + "][" + linkNumber + "]";
          Weditor.Utils.replaceSelection(inputElement, selection);
          inputElement.val(inputElement.val() + postfix);
          Weditor.Utils.setSelection(inputElement, selection, 1, endTagLength)
-         Weditor.Utils.refreshPreview(inputElement);
       }
    },
 
@@ -165,8 +162,21 @@ Weditor.Actions = {
       var inputElement = $(inputElement);
       var selection = inputElement.caret();
       selection = Weditor.Utils.selectWholeLines(inputElement, selection);
-      Weditor.Utils.doBlockquote(inputElement, selection, true);
-      Weditor.Utils.refreshPreview(inputElement);
+      Weditor.ExtendedActions.doBlockquote(inputElement, selection, true);
+   },
+
+   olist: function(inputElement) {
+      var inputElement = $(inputElement);
+      var selection = inputElement.caret();
+      selection = Weditor.Utils.selectWholeLines(inputElement, selection);
+      Weditor.ExtendedActions.doList(inputElement, selection, true, true);
+   },
+
+   list: function(inputElement) {
+      var inputElement = $(inputElement);
+      var selection = inputElement.caret();
+      selection = Weditor.Utils.selectWholeLines(inputElement, selection);
+      Weditor.ExtendedActions.doList(inputElement, selection, false, true);
    },
 
    title: function(inputElement){
@@ -180,23 +190,6 @@ Weditor.Actions = {
       var startTagLength = (selection.text.match(/#/g) || []).length + 1;
       Weditor.Utils.replaceSelection(inputElement, selection);
       Weditor.Utils.setSelection(inputElement, selection, startTagLength, 0);
-      Weditor.Utils.refreshPreview(inputElement);
-   },
-
-   olist: function(inputElement) {
-      var inputElement = $(inputElement);
-      var selection = inputElement.caret();
-      selection = Weditor.Utils.selectWholeLines(inputElement, selection);
-      Weditor.Utils.doList(inputElement, selection, true, true);
-      Weditor.Utils.refreshPreview(inputElement);
-   },
-
-   list: function(inputElement) {
-      var inputElement = $(inputElement);
-      var selection = inputElement.caret();
-      selection = Weditor.Utils.selectWholeLines(inputElement, selection);
-      Weditor.Utils.doList(inputElement, selection, false, true);
-      Weditor.Utils.refreshPreview(inputElement);
    },
 
    pagebreak: function(inputElement) {
@@ -204,7 +197,6 @@ Weditor.Actions = {
       var selection = inputElement.caret();
       selection.text = "\n\n----------\n";
       Weditor.Utils.replaceSelection(inputElement, selection);
-      Weditor.Utils.refreshPreview(inputElement);
    },
 
    undo: function(inputElement) {
@@ -218,62 +210,7 @@ Weditor.Actions = {
    }
 }
 
-Weditor.Utils = {
-   appendControls: function(inputElement) {
-      var element = $(Weditor.Utils.controlsTemplate());
-      $(inputElement).before(element);
-
-      return element;
-   },
-
-   appendPreview: function(inputElement) {
-      var element = $(Weditor.Utils.previewTemplate());
-      element.css("font-size", $(inputElement).css("font-size"));
-      element.css("background-color", $(inputElement).css("background-color"));
-      $(inputElement).parent().after(element);
-
-      return element;
-   },
-
-   replaceSelection: function(inputElement, selection) {
-      var before = inputElement.val().substring(0, selection.start);
-      var after = inputElement.val().substring(selection.end);
-      $(inputElement).val(before + selection.text + after);
-   },
-
-   setSelection: function(inputElement, selection, startTagLength, endTagLength) {
-      var start = selection.start + startTagLength;
-      var end = selection.start + selection.text.length - endTagLength;
-
-      inputElement.setSelection(start, end);
-   },
-
-   doAutoindent: function(inputElement, selection) {
-      var before = $(inputElement).val().substring(0, selection.start);
-      before = before.replace(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]*\n$/, "\n\n");
-      before = before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/, "\n\n");
-      before = before.replace(/(\n|^)[ \t]+\n$/, "\n\n");
-
-      if(/(\n|^)[ ]{0,3}([*+-])[ \t]+.*\n$/.test(before)) {
-         if(Weditor.Utils.doList) {
-            Weditor.Utils.doList($(inputElement), selection, false, true);
-         }
-      } else if(/(\n|^)[ ]{0,3}(\d+[.])[ \t]+.*\n$/.test(before)) {
-         if(Weditor.Utils.doList) {
-            Weditor.Utils.doList($(inputElement), selection, true, true);
-         }
-      } else if(/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(before)) {
-         if(Weditor.Utils.doBlockquote) {
-            Weditor.Utils.doBlockquote($(inputElement), selection, true);
-         }
-      } else {
-         var after = $(inputElement).val().substring(selection.end);
-         inputElement.val(before + selection.text + after); 
-      }
-
-      Weditor.Utils.refreshPreview($(inputElement));
-   },
-
+Weditor.ExtendedActions = {
    doList: function(inputElement, selection, isNumberedList, useDefaultText) {
       var previousItemsRegex = /(\n|^)(([ ]{0,3}([*+-]|\d+[.])[ \t]+.*)(\n.+|\n{2,}([*+-].*|\d+[.])[ \t]+.*|\n{2,}[ \t]+\S.*)*)\n*$/;
       var bullet = "-";
@@ -385,6 +322,86 @@ Weditor.Utils = {
       selection.text = startTag + chunkText + endTag;
       Weditor.Utils.replaceSelection(inputElement, selection);
       Weditor.Utils.setSelection(inputElement, selection, 2, 0);
+   }
+}
+
+Weditor.PreviewManager = {
+   template: "<div class=\"mdm-preview mdm-control\"></div>",
+
+   appendPreview: function(inputElement) {
+      var element = $(Weditor.PreviewManager.template);
+      element.css("font-size", $(inputElement).css("font-size"));
+      element.css("background-color", $(inputElement).css("background-color"));
+      $(inputElement).parent().after(element);
+
+      return element;
+   },
+
+   refreshPreview: function(inputElement) {
+      var converter = new Attacklab.showdown.converter();
+      var preview = inputElement.parent().next();
+
+      preview.html(converter.makeHtml(inputElement.val()));
+   }
+}
+
+Weditor.ControlsManager = {
+   template: 
+      "<div class=\"mdm-buttons mdm-control\">" +
+      "  <ul>" +
+      "    <li class=\"mdm-bold\" title=\"Strong <strong> Ctrl+B\"><a class=\"mdm-icon-bold\" href=\"#mdm-bold\"><span>B</span></a></li>" +
+      "    <li class=\"mdm-italic\" title=\"Emphasis <em> Ctrl+I\"><a class=\"mdm-icon-italic\" href=\"#mdm-italic\"><span>I</span></a></li>" +
+      "    <li class=\"mdm-link\" title=\"Hyperlink <a> Ctrl+L\"><a class=\"mdm-icon-link\" href=\"#mdm-link\"><span>a</span></a></li>" +
+      "    <li class=\"mdm-quotes\" title=\"Blockquote <blockquote> Ctrl+Q\"><a class=\"mdm-icon-quotes-left\" href=\"#mdm-quotes\"><span>q</span></a></li>" +
+      "    <li class=\"mdm-olist\" title=\"Numbered List <ol> Ctrl+O\"><a class=\"mdm-icon-list-numbered\" href=\"#mdm-olist\"><span>ol</span></a></li>" +
+      "    <li class=\"mdm-list\" title=\"Bulleted List <ul> Ctrl+U\"><a class=\"mdm-icon-list2\" href=\"#mdm-list\"><span>ul</span></a></li>" +
+      "    <li class=\"mdm-title\" title=\"Heading <h1>/<h2> Ctrl+H\"><a class=\"mdm-icon-font-size\" href=\"#mdm-title\"><span>T</span></a></li>" +
+      "    <li class=\"mdm-pagebreak\" title=\"Horizontal Rule <hr> Ctrl+R\"><a class=\"mdm-icon-pagebreak\" href=\"#mdm-pagebreak\"><span>hr</span></a></li>" +
+      "    <li class=\"mdm-undo\" title=\"Undo - Ctrl+Z\"><a class=\"mdm-icon-undo\" href=\"#mdm-undo\"><span>z</span></a></li>" +
+      "    <li class=\"mdm-redo\" title=\"Redo - Ctrl+Shift+Z\"><a class=\"mdm-icon-redo\" href=\"#mdm-redo\"><span>y</span></a></li>" +
+      "  </ul>" +
+      "</div>",
+
+   appendControls: function(inputElement) {
+      var element = $(Weditor.ControlsManager.template);
+      $(inputElement).before(element);
+
+      return element;
+   }
+}
+
+Weditor.Utils = {
+   addEvent: function(elem, event, listener) {
+      if (elem.attachEvent) {
+         elem.attachEvent("on" + event, listener);
+      } else {
+         elem.on(event, listener);
+      }
+   },
+
+   doAutoindent: function(inputElement, selection) {
+      var before = inputElement.val().substring(0, selection.start);
+      before = before.replace(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]*\n$/, "\n\n");
+      before = before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/, "\n\n");
+      before = before.replace(/(\n|^)[ \t]+\n$/, "\n\n");
+
+      if(/(\n|^)[ ]{0,3}([*+-])[ \t]+.*\n$/.test(before)) {
+         Weditor.ExtendedActions.doList(inputElement, selection, false, true);
+      } else if(/(\n|^)[ ]{0,3}(\d+[.])[ \t]+.*\n$/.test(before)) {
+         Weditor.ExtendedActions.doList(inputElement, selection, true, true);
+      } else if(/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(before)) {
+         Weditor.ExtendedActions.doBlockquote(inputElement, selection, true);
+      } else {
+         var after = inputElement.val().substring(selection.end);
+         inputElement.val(before + selection.text + after); 
+         Weditor.PreviewManager.refreshPreview(inputElement);
+      }
+   },
+
+   replaceSelection: function(inputElement, selection) {
+      var before = inputElement.val().substring(0, selection.start);
+      var after = inputElement.val().substring(selection.end);
+      inputElement.val(before + selection.text + after);
    },
 
    selectWholeLines: function(inputElement, selection) {
@@ -407,56 +424,23 @@ Weditor.Utils = {
       return selection;
    },
 
-   controlsTemplate: function() {
-      var template =
-         "<div class=\"mdm-buttons mdm-control\">" +
-         "  <ul>" +
-         "    <li class=\"mdm-bold\" title=\"Strong <strong> Ctrl+B\"><a class=\"mdm-icon-bold\" href=\"#mdm-bold\"><span>B</span></a></li>" +
-         "    <li class=\"mdm-italic\" title=\"Emphasis <em> Ctrl+I\"><a class=\"mdm-icon-italic\" href=\"#mdm-italic\"><span>I</span></a></li>" +
-         "    <li class=\"mdm-link\" title=\"Hyperlink <a> Ctrl+L\"><a class=\"mdm-icon-link\" href=\"#mdm-link\"><span>a</span></a></li>" +
-         "    <li class=\"mdm-quotes\" title=\"Blockquote <blockquote> Ctrl+Q\"><a class=\"mdm-icon-quotes-left\" href=\"#mdm-quotes\"><span>q</span></a></li>" +
-         "    <li class=\"mdm-olist\" title=\"Numbered List <ol> Ctrl+O\"><a class=\"mdm-icon-list-numbered\" href=\"#mdm-olist\"><span>ol</span></a></li>" +
-         "    <li class=\"mdm-list\" title=\"Bulleted List <ul> Ctrl+U\"><a class=\"mdm-icon-list2\" href=\"#mdm-list\"><span>ul</span></a></li>" +
-         "    <li class=\"mdm-title\" title=\"Heading <h1>/<h2> Ctrl+H\"><a class=\"mdm-icon-font-size\" href=\"#mdm-title\"><span>T</span></a></li>" +
-         "    <li class=\"mdm-pagebreak\" title=\"Horizontal Rule <hr> Ctrl+R\"><a class=\"mdm-icon-pagebreak\" href=\"#mdm-pagebreak\"><span>hr</span></a></li>" +
-         "    <li class=\"mdm-undo\" title=\"Undo - Ctrl+Z\"><a class=\"mdm-icon-undo\" href=\"#mdm-undo\"><span>z</span></a></li>" +
-         "    <li class=\"mdm-redo\" title=\"Redo - Ctrl+Shift+Z\"><a class=\"mdm-icon-redo\" href=\"#mdm-redo\"><span>y</span></a></li>" +
-         "  </ul>" +
-         "</div>";
+   setSelection: function(inputElement, selection, startTagLength, endTagLength) {
+      var start = selection.start + startTagLength;
+      var end = selection.start + selection.text.length - endTagLength;
 
-      return template;
-   },
-
-   previewTemplate: function() {
-      var template = "<div class=\"mdm-preview mdm-control\"></div>";
-
-      return template;
-   },
-
-   refreshPreview: function(inputElement) {
-      var converter = new Attacklab.showdown.converter();
-      var preview = $(inputElement).parent().next();
-
-      $(preview).html(converter.makeHtml($(inputElement).val()));
-   },
-
-   addEvent: function(elem, event, listener) {
-      if (elem.attachEvent) {
-         elem.attachEvent("on" + event, listener);
-      } else {
-         $(elem).on(event, listener);
-      }
+      inputElement.setSelection(start, end);
+      Weditor.PreviewManager.refreshPreview(inputElement);
    }
 }
 
-$(function(){
-   jQuery.fn.mdmagick = function() {
+$(function() {
+   jQuery.fn.weditThis = function() {
       this.each(function(index, inputElement) {
          var mdm = new Weditor(inputElement);
       });
    };
 
-   $(".wedit-input").mdmagick();
+   $(".wedit-input").weditThis();
 });
 
 jQuery.fn.extend({

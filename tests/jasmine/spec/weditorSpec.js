@@ -17,7 +17,7 @@ describe("Weditor", function() {
 
    describe("on initialization", function() {
       beforeEach(function() {
-         $("#it").mdmagick();
+         $("#it").weditThis();
       });
 
       it("should append the preview right after the wedit-inputs parent", function() {
