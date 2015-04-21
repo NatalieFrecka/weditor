@@ -12,56 +12,22 @@ function Weditor(inputElement) {
       this.updatePreview();
 
       Weditor.Utils.addEvent(this.inputElement, "keydown", function(key) {
+         var keyCodeMap = {"b": Weditor.Actions.bold, "i": Weditor.Actions.italic, "l": Weditor.Actions.link, 
+                           "q": Weditor.Actions.quotes, "o": Weditor.Actions.olist, "u": Weditor.Actions.list, 
+                           "h": Weditor.Actions.title, "r": Weditor.Actions.pagebreak, "y": Weditor.Actions.redo,
+                           "z": key.shiftKey ? Weditor.Actions.redo : Weditor.Actions.undo}
+
          if (key.ctrlKey || key.metaKey) {
             var keyCode = key.charCode || key.keyCode;
             var keyCodeStr = String.fromCharCode(keyCode).toLowerCase();
-        
-            switch(keyCodeStr) {
-               case "b":
-                  Weditor.Actions.bold(inputElement);
-                  break;
-               case "i":
-                  Weditor.Actions.italic(inputElement);
-                  break;
-               case "l":
-                  Weditor.Actions.link(inputElement);
-                  break;
-               case "q":
-                  Weditor.Actions.quotes(inputElement);
-                  break;
-               case "o":
-                  Weditor.Actions.olist(inputElement);
-                  break;
-               case "u":
-                  Weditor.Actions.list(inputElement);
-                  break;
-               case "h":
-                  Weditor.Actions.title(inputElement);
-                  break;
-               case "r":
-                  Weditor.Actions.pagebreak(inputElement);
-                  break;
-               case "y":
-                  Weditor.Actions.redo(inputElement);
-                  break;
-               case "z":
-                  if(key.shiftKey) {
-                     Weditor.Actions.redo(inputElement);
-                  } else {
-                     Weditor.Actions.undo(inputElement);
-                  }
-                  break;
-               default:
-                  return;
-            }
 
-            if (key.preventDefault) {
-               key.preventDefault();
-            }
-        
-            if (top.event) {
-               top.event.returnValue = false;
-            }
+            Object.keys(keyCodeMap).forEach(function(code) {
+               if (keyCodeStr === code) {
+                  keyCodeMap[code](inputElement);
+                  if (key.preventDefault) key.preventDefault();
+                  if (top.event) top.event.returnValue = false;   
+               }
+            });
          }
       });
 
@@ -148,7 +114,7 @@ Weditor.Actions = {
       var link = prompt( "Link to URL", "http://" );
       var linkNumber = inputElement.parent().next().children().first().children("a").size() + 1;
       var postfix = "\n[" + linkNumber + "]: " + link;
-      if(link) {
+      if (link) {
          var text = $.trim(selection.text) || "link text";
          var endTagLength = linkNumber.toString().length + 3;
          selection.text = "[" + text + "][" + linkNumber + "]";
@@ -222,7 +188,7 @@ Weditor.ExtendedActions = {
 
       var getItemPrefix = function() {
          var prefix;
-         if(isNumberedList) {
+         if (isNumberedList) {
             prefix = " " + num + ". ";
             num++;
          } else {
@@ -233,7 +199,7 @@ Weditor.ExtendedActions = {
       };
 
       var getPrefixedItem = function(itemText) {
-         if(isNumberedList === undefined) {
+         if (isNumberedList === undefined) {
             isNumberedList = /^\s*\d/.test(itemText);
          }
 
@@ -260,7 +226,7 @@ Weditor.ExtendedActions = {
          line = $.trim(line);
          var prefix = getItemPrefix();
          var spaces = prefix.replace(/./g, " ");
-         if(line.length > 0) result.push((prefix) + line.replace(/\n/g, "\n" + spaces));
+         if (line.length > 0) result.push((prefix) + line.replace(/\n/g, "\n" + spaces));
       });
 
       selection.text = result.toString().replace(/,/g, "\n");
@@ -280,14 +246,14 @@ Weditor.ExtendedActions = {
 
       var replaceBlanksInTags = function(useBracket, startTag, endTag) {
          var replacement = useBracket ? "> " : "";
-         if(startTag) {
+         if (startTag) {
             startTag = startTag.replace(/\n((>|\s)*)\n$/,
                function(totalMatch, markdown) {
                   return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
                });
          }
 
-         if(endTag) {
+         if (endTag) {
             endTag = endTag.replace(/^\n((>|\s)*)\n/,
                function(totalMatch, markdown) {
                   return "\n" + markdown.replace(/^[ ]{0,3}>?[ \t]*$/gm, replacement) + "\n";
@@ -295,23 +261,23 @@ Weditor.ExtendedActions = {
          }
       };
 
-      if(/^(?![ ]{0,3}>)/m.test(chunkText)) {
+      if (/^(?![ ]{0,3}>)/m.test(chunkText)) {
          chunkText = chunkText.replace(/^/gm, "> ");
          replaceBlanksInTags(true, startTag, endTag);
       } else {
          chunkText = chunkText.replace(/^[ ]{0,3}> ?/gm, "");
          replaceBlanksInTags(false, startTag, endTag);
 
-         if(!/^(\n|^)[ ]{0,3}>/.test(chunkText) && startTag) {
+         if (!/^(\n|^)[ ]{0,3}>/.test(chunkText) && startTag) {
             startTag = startTag.replace(/\n{0,2}$/, "\n\n");
          }
 
-         if(!/(\n|^)[ ]{0,3}>.*$/.test(chunkText) && endTag) {
+         if (!/(\n|^)[ ]{0,3}>.*$/.test(chunkText) && endTag) {
             endTag = endTag.replace(/^\n{0,2}/, "\n\n");
          }
       }
 
-      if(!/\n/.test(chunkText)) {
+      if (!/\n/.test(chunkText)) {
          chunkText = chunkText.replace(/^(> *)/,
             function(wholeMatch, blanks){
                startTag += blanks;
@@ -385,11 +351,11 @@ Weditor.Utils = {
       before = before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/, "\n\n");
       before = before.replace(/(\n|^)[ \t]+\n$/, "\n\n");
 
-      if(/(\n|^)[ ]{0,3}([*+-])[ \t]+.*\n$/.test(before)) {
+      if (/(\n|^)[ ]{0,3}([*+-])[ \t]+.*\n$/.test(before)) {
          Weditor.ExtendedActions.doList(inputElement, selection, false, true);
-      } else if(/(\n|^)[ ]{0,3}(\d+[.])[ \t]+.*\n$/.test(before)) {
+      } else if (/(\n|^)[ ]{0,3}(\d+[.])[ \t]+.*\n$/.test(before)) {
          Weditor.ExtendedActions.doList(inputElement, selection, true, true);
-      } else if(/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(before)) {
+      } else if (/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(before)) {
          Weditor.ExtendedActions.doBlockquote(inputElement, selection, true);
       } else {
          var after = inputElement.val().substring(selection.end);
@@ -445,7 +411,7 @@ $(function() {
 
 jQuery.fn.extend({
    setSelection: function(selectionStart, selectionEnd) {
-      if(this.length == 0) return this;
+      if (this.length == 0) return this;
       input = this[0];
 
       if (input.createTextRange) {
