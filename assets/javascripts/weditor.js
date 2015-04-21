@@ -249,7 +249,6 @@ Weditor.Utils = {
    },
 
    doAutoindent: function(inputElement, selection) {
-      // Copy wmd's way ending the auto-indent
       var before = $(inputElement).val().substring(0, selection.start);
       before = before.replace(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]*\n$/, "\n\n");
       before = before.replace(/(\n|^)[ ]{0,3}>[ \t]*\n$/, "\n\n");
@@ -259,18 +258,17 @@ Weditor.Utils = {
          if(Weditor.Utils.doList) {
             Weditor.Utils.doList($(inputElement), selection, false, true);
          }
-      }
-
-      if(/(\n|^)[ ]{0,3}(\d+[.])[ \t]+.*\n$/.test(before)) {
+      } else if(/(\n|^)[ ]{0,3}(\d+[.])[ \t]+.*\n$/.test(before)) {
          if(Weditor.Utils.doList) {
             Weditor.Utils.doList($(inputElement), selection, true, true);
          }
-      }
-
-      if(/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(before)) {
+      } else if(/(\n|^)[ ]{0,3}>[ \t]+.*\n$/.test(before)) {
          if(Weditor.Utils.doBlockquote) {
             Weditor.Utils.doBlockquote($(inputElement), selection, true);
          }
+      } else {
+         var after = $(inputElement).val().substring(selection.end);
+         inputElement.val(before + selection.text + after); 
       }
 
       Weditor.Utils.refreshPreview($(inputElement));

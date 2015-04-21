@@ -459,6 +459,10 @@ describe("Weditor", function() {
                it("will handle multiple lines", function() {
                   expect($("#it").val()).toBe("> One\n> Two\n> Three\n> Four");
                });
+
+               it("should update the preivew div", function() {
+                  expect($(".mdm-preview").html()).toBe("<blockquote>\n  <p>One\n  Two\n  Three\n  Four</p>\n</blockquote>")
+               });
             });
 
             describe("Ordered List button", function() {
@@ -469,6 +473,10 @@ describe("Weditor", function() {
                it("will handle multiple lines", function() {
                   expect($("#it").val()).toBe(" 1. One\n 2. Two\n 3. Three\n 4. Four");
                });
+
+               it("should update the preivew div", function() {
+                  expect($(".mdm-preview").html()).toBe("<ol>\n<li>One</li>\n<li>Two</li>\n<li>Three</li>\n<li>Four</li>\n</ol>")
+               });
             });
 
             describe("Unordered List button", function() {
@@ -478,6 +486,10 @@ describe("Weditor", function() {
 
                it("will handle multiple lines", function() {
                   expect($("#it").val()).toBe(" - One\n - Two\n - Three\n - Four");
+               });
+
+               it("should update the preivew div", function() {
+                  expect($(".mdm-preview").html()).toBe("<ul>\n<li>One</li>\n<li>Two</li>\n<li>Three</li>\n<li>Four</li>\n</ul>")
                });
             });
          });
@@ -495,6 +507,10 @@ describe("Weditor", function() {
                it("should add second line of default blockquote text", function() {
                   expect($("#it").val()).toBe("> Blockquote\n> Blockquote");
                });
+
+               it("should update the preivew div", function() {
+                  expect($(".mdm-preview").html()).toBe("<blockquote>\n  <p>Blockquote\n  Blockquote</p>\n</blockquote>")
+               });
             });
 
             describe("autoindent ordered lists", function() {
@@ -506,6 +522,10 @@ describe("Weditor", function() {
                it("it should add a second ordered list item", function() {
                   expect($("#it").val()).toBe(" 1. List item\n 2. List item");
                });
+
+               it("should update the preivew div", function() {
+                  expect($(".mdm-preview").html()).toBe("<ol>\n<li>List item</li>\n<li>List item</li>\n</ol>")
+               });
             });
 
             describe("autoindent unordered lists", function() {
@@ -516,6 +536,58 @@ describe("Weditor", function() {
 
                it("it should add a second ordered list item", function() {
                   expect($("#it").val()).toBe(" - List item\n - List item");
+               });
+
+               it("should update the preivew div", function() {
+                  expect($(".mdm-preview").html()).toBe("<ul>\n<li>List item</li>\n<li>List item</li>\n</ul>")
+               });
+            });
+
+            describe("escaping blockquote autoindent", function() {
+               beforeEach(function() {
+                  $("#it").val("> Blockquote\n> \n")
+                  spyOn(jQuery.fn, "caret").and.returnValue({start: 16, end: 16, text: ""});
+                  $("#it").trigger(keypress);
+               });
+
+               it("should not continue the autoindent pattern and remove any superfluous blockquote tags", function() {
+                  expect($("#it").val()).toBe("> Blockquote\n\n");
+               });
+
+               it("should update the preivew div", function() {
+                  expect($(".mdm-preview").html()).toBe("<blockquote>\n  <p>Blockquote</p>\n</blockquote>")
+               });
+            });
+
+            describe("escaping ordered list autoindent", function() {
+               beforeEach(function() {
+                  $("#it").val(" 1. List item\n 2. \n")
+                  spyOn(jQuery.fn, "caret").and.returnValue({start: 19, end: 19, text: ""});
+                  $("#it").trigger(keypress);
+               });
+
+               it("should not continue the autoindent pattern and remove any superfluous list tags", function() {
+                  expect($("#it").val()).toBe(" 1. List item\n\n");
+               });
+
+               it("should update the preivew div", function() {
+                  expect($(".mdm-preview").html()).toBe("<ol>\n<li>List item</li>\n</ol>")
+               });
+            });
+
+            describe("escaping unordered list autoindent", function() {
+               beforeEach(function() {
+                  $("#it").val(" - List item\n - \n")
+                  spyOn(jQuery.fn, "caret").and.returnValue({start: 17, end: 17, text: ""});
+                  $("#it").trigger(keypress);
+               });
+
+               it("should not continue the autoindent pattern and remove any superfluous list tags", function() {
+                  expect($("#it").val()).toBe(" - List item\n\n");
+               });
+
+               it("should update the preivew div", function() {
+                  expect($(".mdm-preview").html()).toBe("<ul>\n<li>List item</li>\n</ul>")
                });
             });
          });
