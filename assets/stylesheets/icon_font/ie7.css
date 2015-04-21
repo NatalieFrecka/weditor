@@ -1,30 +1,30 @@
-.mdm-icon-undo {
+.wedit-icon-undo {
 	*zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xe965;');
 }
-.mdm-icon-redo {
+.wedit-icon-redo {
 	*zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xe966;');
 }
-.mdm-icon-quotes-left {
+.wedit-icon-quotes-left {
 	*zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xe977;');
 }
-.mdm-icon-list-numbered {
+.wedit-icon-list-numbered {
 	*zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xe9b9;');
 }
-.mdm-icon-list2 {
+.wedit-icon-list2 {
 	*zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xe9bb;');
 }
-.mdm-icon-link {
+.wedit-icon-link {
 	*zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xe9cb;');
 }
-.mdm-icon-font-size {
+.wedit-icon-font-size {
 	*zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xea61;');
 }
-.mdm-icon-bold {
+.wedit-icon-bold {
 	*zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xea62;');
 }
-.mdm-icon-italic {
+.wedit-icon-italic {
 	*zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xea64;');
 }
-.mdm-icon-pagebreak {
+.wedit-icon-pagebreak {
 	*zoom: expression(this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xea6e;');
 }

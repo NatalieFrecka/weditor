@@ -21,15 +21,15 @@ describe("Weditor", function() {
       });
 
       it("should append the preview right after the wedit-inputs parent", function() {
-         expect($(".weditor").next().prop("class")).toBe("mdm-preview mdm-control");
+         expect($(".weditor").next().prop("class")).toBe("wedit-preview wedit-control");
       });
 
       it("should prepend the button bar before the wedit-input", function() {
-         expect($("#it").prev().prop("class")).toBe("mdm-buttons mdm-control");
+         expect($("#it").prev().prop("class")).toBe("wedit-buttons wedit-control");
       });
 
       it("should show the preview", function() {
-         expect($(".mdm-preview").is(":visible")).toBe(true);
+         expect($(".wedit-preview").is(":visible")).toBe(true);
       });
 
       it("should hide the wedit-input", function() {
@@ -37,13 +37,13 @@ describe("Weditor", function() {
       });
 
       it("should hide the button bar", function() {
-         expect($(".mdm-buttons").is(":visible")).toBe(false);
+         expect($(".wedit-buttons").is(":visible")).toBe(false);
       });
 
       describe("clicking the preview box", function() {
          beforeEach(function() {
             spyOn(jQuery.fn, "setSelection");
-            $(".mdm-preview").click();
+            $(".wedit-preview").click();
          });
 
          it("should show the wedit-input", function() {
@@ -51,7 +51,7 @@ describe("Weditor", function() {
          });
 
          it("should show the button bar", function() {
-            expect($(".mdm-buttons").is(":visible")).toBe(true);
+            expect($(".wedit-buttons").is(":visible")).toBe(true);
          });
 
          describe("wedit-input on blur", function() {
@@ -61,7 +61,7 @@ describe("Weditor", function() {
             });
 
             it("should still show the preview div", function() {
-               expect($(".mdm-preview").is(":visible")).toBe(true);
+               expect($(".wedit-preview").is(":visible")).toBe(true);
             });
 
             it("should hide the wedit-input", function() {
@@ -69,13 +69,13 @@ describe("Weditor", function() {
             });
 
             it("should hide the button bar", function() {
-               expect($(".mdm-buttons").is(":visible")).toBe(false);
+               expect($(".wedit-buttons").is(":visible")).toBe(false);
             });
          });
 
          describe("when Bold button is clicked with no selection", function() {
             beforeEach(function() {
-               $(".mdm-bold").click();
+               $(".wedit-bold").click();
             });
 
             it("should insert the defaulted bold text at the cursor", function() {
@@ -83,7 +83,7 @@ describe("Weditor", function() {
             });
 
             it("should update the preview div", function() {
-               expect($(".mdm-preview").html()).toBe("<p><strong>strong text</strong></p>");
+               expect($(".wedit-preview").html()).toBe("<p><strong>strong text</strong></p>");
             });
 
             it("should call setSelection with the correct args", function() {
@@ -93,7 +93,7 @@ describe("Weditor", function() {
 
          describe("when Italics button is clicked with no selection", function() {
             beforeEach(function() {
-               $(".mdm-italic").click();
+               $(".wedit-italic").click();
             });
 
             it("should insert the default italic text at cursor", function() {
@@ -101,7 +101,7 @@ describe("Weditor", function() {
             });
 
             it("should update the preview div", function() {
-               expect($(".mdm-preview").html()).toBe("<p><em>italic text</em></p>");
+               expect($(".wedit-preview").html()).toBe("<p><em>italic text</em></p>");
             });
 
             it("should call setSelection with the correct args", function() {
@@ -112,7 +112,7 @@ describe("Weditor", function() {
          describe("when Link button is clicked with no selection", function() {
             beforeEach(function() {
                spyOn(window, 'prompt').and.returnValue("http://www.google.com");
-               $(".mdm-link").click();
+               $(".wedit-link").click();
             });
 
             it("should insert the default link text at cursor", function() {
@@ -120,7 +120,7 @@ describe("Weditor", function() {
             });
 
             it("should update the preview div", function() {
-               expect($(".mdm-preview").html()).toBe('<p><a href="http://www.google.com">link text</a></p>');
+               expect($(".wedit-preview").html()).toBe('<p><a href="http://www.google.com">link text</a></p>');
             });
 
             it("should call setSelection with the correct args", function() {
@@ -130,7 +130,7 @@ describe("Weditor", function() {
             describe("when a second link is added", function() {
                beforeEach(function() {
                   spyOn(jQuery.fn, "caret").and.returnValue({start: 14, end: 14, text: ""});
-                  $(".mdm-link").click();
+                  $(".wedit-link").click();
                });
 
                it("should insert the default link text at cursor", function() {
@@ -138,14 +138,14 @@ describe("Weditor", function() {
                });
 
                it("should update the preview div", function() {
-                  expect($(".mdm-preview").html()).toBe('<p><a href="http://www.google.com">link text</a><a href="http://www.google.com">link text</a></p>');
+                  expect($(".wedit-preview").html()).toBe('<p><a href="http://www.google.com">link text</a><a href="http://www.google.com">link text</a></p>');
                });
             });
          });
 
          describe("when Quotes button is clicked with no selection", function() {
             beforeEach(function() {
-               $(".mdm-quotes").click();
+               $(".wedit-quotes").click();
             });
 
             it("should insert the default quote text at cursor", function() {
@@ -153,7 +153,7 @@ describe("Weditor", function() {
             });
 
             it("should update the preview div", function() {
-               expect($(".mdm-preview").html()).toBe("<blockquote>\n  <p>Blockquote</p>\n</blockquote>");
+               expect($(".wedit-preview").html()).toBe("<blockquote>\n  <p>Blockquote</p>\n</blockquote>");
             });
 
             it("should call setSelection with the correct args", function() {
@@ -163,7 +163,7 @@ describe("Weditor", function() {
 
          describe("when Ordered List button is clicked with no selection", function() {
             beforeEach(function() {
-               $(".mdm-olist").click();
+               $(".wedit-olist").click();
             });
 
             it("should insert the default ordered list text at cursor", function() {
@@ -171,7 +171,7 @@ describe("Weditor", function() {
             });
 
             it("should update the preview div", function() {
-               expect($(".mdm-preview").html()).toBe('<ol>\n<li>List item</li>\n</ol>');
+               expect($(".wedit-preview").html()).toBe('<ol>\n<li>List item</li>\n</ol>');
             });
 
             it("should call setSelection with the correct args", function() {
@@ -182,7 +182,7 @@ describe("Weditor", function() {
                beforeEach(function() {
                   spyOn(jQuery.fn, "caret").and.returnValue({start: 14, end: 14, text: ""});
                   $("#it").val($("#it").val() + "\n");
-                  $(".mdm-olist").click();
+                  $(".wedit-olist").click();
                });
 
                it("should add a second list item with the correct prefix", function() {
@@ -190,14 +190,14 @@ describe("Weditor", function() {
                });
 
                it("should update the preview div", function() {
-                  expect($(".mdm-preview").html()).toBe('<ol>\n<li>List item</li>\n<li>List item</li>\n</ol>');
+                  expect($(".wedit-preview").html()).toBe('<ol>\n<li>List item</li>\n<li>List item</li>\n</ol>');
                });
             });
          });
 
          describe("when Unordered List button is clicked with no selection", function() {
             beforeEach(function() {
-               $(".mdm-list").click();
+               $(".wedit-list").click();
             });
 
             it("should insert the default unordered list text at cursor", function() {
@@ -205,7 +205,7 @@ describe("Weditor", function() {
             });
 
             it("should update the preview div", function() {
-               expect($(".mdm-preview").html()).toBe('<ul>\n<li>List item</li>\n</ul>');
+               expect($(".wedit-preview").html()).toBe('<ul>\n<li>List item</li>\n</ul>');
             });
 
             it("should call setSelection with the correct args", function() {
@@ -216,7 +216,7 @@ describe("Weditor", function() {
                beforeEach(function() {
                   spyOn(jQuery.fn, "caret").and.returnValue({start: 13, end: 13, text: ""});
                   $("#it").val($("#it").val() + "\n");
-                  $(".mdm-list").click();
+                  $(".wedit-list").click();
                });
 
                it("should add a second list item with the correct prefix", function() {
@@ -224,14 +224,14 @@ describe("Weditor", function() {
                });
 
                it("should update the preview div", function() {
-                  expect($(".mdm-preview").html()).toBe('<ul>\n<li>List item</li>\n<li>List item</li>\n</ul>');
+                  expect($(".wedit-preview").html()).toBe('<ul>\n<li>List item</li>\n<li>List item</li>\n</ul>');
                });
             });
          });
 
          describe("when Title button is clicked with no selection", function() {
             beforeEach(function() {
-               $(".mdm-title").click();
+               $(".wedit-title").click();
             });
 
             it("should insert the default header text at cursor", function() {
@@ -239,7 +239,7 @@ describe("Weditor", function() {
             });
 
             it("should update the preview div", function() {
-               expect($(".mdm-preview").html()).toBe('<h1>Heading</h1>');
+               expect($(".wedit-preview").html()).toBe('<h1>Heading</h1>');
             });
 
             it("should call setSelection with the correct args", function() {
@@ -248,7 +248,7 @@ describe("Weditor", function() {
 
             describe("when Title button is clicked second time", function() {
                beforeEach(function() {
-                  $(".mdm-title").click();
+                  $(".wedit-title").click();
                });
 
                it("should add second hash symbol", function() {
@@ -256,7 +256,7 @@ describe("Weditor", function() {
                });
 
                it("should update the preview div", function() {
-                  expect($(".mdm-preview").html()).toBe('<h2>Heading</h2>');
+                  expect($(".wedit-preview").html()).toBe('<h2>Heading</h2>');
                });
 
                it("should call setSelection with the correct args", function() {
@@ -267,7 +267,7 @@ describe("Weditor", function() {
 
          describe("when Pagebreak button is clicked with no selection", function() {
             beforeEach(function() {
-               $(".mdm-pagebreak").click();
+               $(".wedit-pagebreak").click();
             });
 
             it("should insert the default page break text at cursor", function() {
@@ -275,7 +275,7 @@ describe("Weditor", function() {
             });
 
             it("should update the preview div", function() {
-               expect($(".mdm-preview").html()).toBe('<hr>');
+               expect($(".wedit-preview").html()).toBe('<hr>');
             });
          });
 
@@ -287,7 +287,7 @@ describe("Weditor", function() {
 
             describe("when Bold button is clicked", function() {
                beforeEach(function() {
-                  $(".mdm-bold").click();
+                  $(".wedit-bold").click();
                });
 
                it("should bold the selected text", function() {
@@ -295,7 +295,7 @@ describe("Weditor", function() {
                });
 
                it("should update the preview div", function() {
-                  expect($(".mdm-preview").html()).toBe('<p><strong>Default Text</strong> not selected</p>');
+                  expect($(".wedit-preview").html()).toBe('<p><strong>Default Text</strong> not selected</p>');
                });
 
                it("should call setSelection with the correct args", function() {
@@ -305,7 +305,7 @@ describe("Weditor", function() {
 
             describe("when Italics button is clicked", function() {
                beforeEach(function() {
-                  $(".mdm-italic").click();
+                  $(".wedit-italic").click();
                });
 
                it("should italicize the selected text", function() {
@@ -313,7 +313,7 @@ describe("Weditor", function() {
                });
 
                it("should update the preview div", function() {
-                  expect($(".mdm-preview").html()).toBe('<p><em>Default Text</em> not selected</p>');
+                  expect($(".wedit-preview").html()).toBe('<p><em>Default Text</em> not selected</p>');
                });
 
                it("should call setSelection with the correct args", function() {
@@ -324,7 +324,7 @@ describe("Weditor", function() {
             describe("when Link button is clicked", function() {
                beforeEach(function() {
                   spyOn(window, 'prompt').and.returnValue("http://www.google.com");
-                  $(".mdm-link").click();
+                  $(".wedit-link").click();
                });
 
                it("should use the selected text as link text and add the link ref at the end of the input text", function() {
@@ -332,7 +332,7 @@ describe("Weditor", function() {
                });
 
                it("should update the preview div", function() {
-                  expect($(".mdm-preview").html()).toBe('<p><a href="http://www.google.com">Default Text</a> not selected</p>');
+                  expect($(".wedit-preview").html()).toBe('<p><a href="http://www.google.com">Default Text</a> not selected</p>');
                });
 
                it("should call setSelection with the correct args", function() {
@@ -342,7 +342,7 @@ describe("Weditor", function() {
 
             describe("when Quotes button is clicked", function() {
                beforeEach(function() {
-                  $(".mdm-quotes").click();
+                  $(".wedit-quotes").click();
                });
 
                it("should make the whole line a block quote", function() {
@@ -350,7 +350,7 @@ describe("Weditor", function() {
                });
 
                it("should update the preview div", function() {
-                  expect($(".mdm-preview").html()).toBe('<blockquote>\n  <p>Default Text not selected</p>\n</blockquote>');
+                  expect($(".wedit-preview").html()).toBe('<blockquote>\n  <p>Default Text not selected</p>\n</blockquote>');
                });
 
                it("should call setSelection with the correct args", function() {
@@ -360,7 +360,7 @@ describe("Weditor", function() {
 
             describe("when Ordered List button is clicked", function() {
                beforeEach(function() {
-                  $(".mdm-olist").click();
+                  $(".wedit-olist").click();
                });
 
                it("should make the whole line a list item", function() {
@@ -368,7 +368,7 @@ describe("Weditor", function() {
                });
 
                it("should update the preview div", function() {
-                  expect($(".mdm-preview").html()).toBe('<ol>\n<li>Default Text not selected</li>\n</ol>');
+                  expect($(".wedit-preview").html()).toBe('<ol>\n<li>Default Text not selected</li>\n</ol>');
                });
 
                it("should call setSelection with the correct args", function() {
@@ -378,7 +378,7 @@ describe("Weditor", function() {
 
             describe("when Unordered List button is clicked", function() {
                beforeEach(function() {
-                  $(".mdm-list").click();
+                  $(".wedit-list").click();
                });
 
                it("should make the whole line a list item", function() {
@@ -386,7 +386,7 @@ describe("Weditor", function() {
                });
 
                it("should update the preview div", function() {
-                  expect($(".mdm-preview").html()).toBe('<ul>\n<li>Default Text not selected</li>\n</ul>');
+                  expect($(".wedit-preview").html()).toBe('<ul>\n<li>Default Text not selected</li>\n</ul>');
                });
 
                it("should call setSelection with the correct args", function() {
@@ -396,7 +396,7 @@ describe("Weditor", function() {
 
             describe("when Title button is clicked", function() {
                beforeEach(function() {
-                  $(".mdm-title").click();
+                  $(".wedit-title").click();
                });
 
                it("should add a hash to the whole line", function() {
@@ -404,7 +404,7 @@ describe("Weditor", function() {
                });
 
                it("should update the preview div", function() {
-                  expect($(".mdm-preview").html()).toBe('<h1>Default Text not selected</h1>');
+                  expect($(".wedit-preview").html()).toBe('<h1>Default Text not selected</h1>');
                });
 
                it("should call setSelection with the correct args", function() {
@@ -413,7 +413,7 @@ describe("Weditor", function() {
 
                describe("when Title button is clicked second time", function() {
                   beforeEach(function() {
-                     $(".mdm-title").click();
+                     $(".wedit-title").click();
                   });
 
                   it("should add second hash symbol", function() {
@@ -421,7 +421,7 @@ describe("Weditor", function() {
                   });
 
                   it("should update the preview div", function() {
-                     expect($(".mdm-preview").html()).toBe('<h2>Default Text not selected</h2>');
+                     expect($(".wedit-preview").html()).toBe('<h2>Default Text not selected</h2>');
                   });
 
                   it("should call setSelection with the correct args", function() {
@@ -432,7 +432,7 @@ describe("Weditor", function() {
 
             describe("when Pagebreak button is clicked", function() {
                beforeEach(function() {
-                  $(".mdm-pagebreak").click();
+                  $(".wedit-pagebreak").click();
                });
 
                it("should replace the text with a page break", function() {
@@ -440,7 +440,7 @@ describe("Weditor", function() {
                });
 
                it("should update the preview div", function() {
-                  expect($(".mdm-preview").html()).toBe('<hr>\n\n<p>not selected</p>');
+                  expect($(".wedit-preview").html()).toBe('<hr>\n\n<p>not selected</p>');
                });
             });
          });
@@ -453,7 +453,7 @@ describe("Weditor", function() {
 
             describe("Quotes button", function() {
                beforeEach(function() {
-                  $(".mdm-quotes").click();
+                  $(".wedit-quotes").click();
                });
 
                it("will handle multiple lines", function() {
@@ -461,13 +461,13 @@ describe("Weditor", function() {
                });
 
                it("should update the preivew div", function() {
-                  expect($(".mdm-preview").html()).toBe("<blockquote>\n  <p>One\n  Two\n  Three\n  Four</p>\n</blockquote>")
+                  expect($(".wedit-preview").html()).toBe("<blockquote>\n  <p>One\n  Two\n  Three\n  Four</p>\n</blockquote>")
                });
             });
 
             describe("Ordered List button", function() {
                beforeEach(function() {
-                  $(".mdm-olist").click();
+                  $(".wedit-olist").click();
                });
 
                it("will handle multiple lines", function() {
@@ -475,13 +475,13 @@ describe("Weditor", function() {
                });
 
                it("should update the preivew div", function() {
-                  expect($(".mdm-preview").html()).toBe("<ol>\n<li>One</li>\n<li>Two</li>\n<li>Three</li>\n<li>Four</li>\n</ol>")
+                  expect($(".wedit-preview").html()).toBe("<ol>\n<li>One</li>\n<li>Two</li>\n<li>Three</li>\n<li>Four</li>\n</ol>")
                });
             });
 
             describe("Unordered List button", function() {
                beforeEach(function() {
-                  $(".mdm-list").click();
+                  $(".wedit-list").click();
                });
 
                it("will handle multiple lines", function() {
@@ -489,7 +489,7 @@ describe("Weditor", function() {
                });
 
                it("should update the preivew div", function() {
-                  expect($(".mdm-preview").html()).toBe("<ul>\n<li>One</li>\n<li>Two</li>\n<li>Three</li>\n<li>Four</li>\n</ul>")
+                  expect($(".wedit-preview").html()).toBe("<ul>\n<li>One</li>\n<li>Two</li>\n<li>Three</li>\n<li>Four</li>\n</ul>")
                });
             });
          });
@@ -509,7 +509,7 @@ describe("Weditor", function() {
                });
 
                it("should update the preivew div", function() {
-                  expect($(".mdm-preview").html()).toBe("<blockquote>\n  <p>Blockquote\n  Blockquote</p>\n</blockquote>")
+                  expect($(".wedit-preview").html()).toBe("<blockquote>\n  <p>Blockquote\n  Blockquote</p>\n</blockquote>")
                });
             });
 
@@ -524,7 +524,7 @@ describe("Weditor", function() {
                });
 
                it("should update the preivew div", function() {
-                  expect($(".mdm-preview").html()).toBe("<ol>\n<li>List item</li>\n<li>List item</li>\n</ol>")
+                  expect($(".wedit-preview").html()).toBe("<ol>\n<li>List item</li>\n<li>List item</li>\n</ol>")
                });
             });
 
@@ -539,7 +539,7 @@ describe("Weditor", function() {
                });
 
                it("should update the preivew div", function() {
-                  expect($(".mdm-preview").html()).toBe("<ul>\n<li>List item</li>\n<li>List item</li>\n</ul>")
+                  expect($(".wedit-preview").html()).toBe("<ul>\n<li>List item</li>\n<li>List item</li>\n</ul>")
                });
             });
 
@@ -555,7 +555,7 @@ describe("Weditor", function() {
                });
 
                it("should update the preivew div", function() {
-                  expect($(".mdm-preview").html()).toBe("<blockquote>\n  <p>Blockquote</p>\n</blockquote>")
+                  expect($(".wedit-preview").html()).toBe("<blockquote>\n  <p>Blockquote</p>\n</blockquote>")
                });
             });
 
@@ -571,7 +571,7 @@ describe("Weditor", function() {
                });
 
                it("should update the preivew div", function() {
-                  expect($(".mdm-preview").html()).toBe("<ol>\n<li>List item</li>\n</ol>")
+                  expect($(".wedit-preview").html()).toBe("<ol>\n<li>List item</li>\n</ol>")
                });
             });
 
@@ -587,7 +587,7 @@ describe("Weditor", function() {
                });
 
                it("should update the preivew div", function() {
-                  expect($(".mdm-preview").html()).toBe("<ul>\n<li>List item</li>\n</ul>")
+                  expect($(".wedit-preview").html()).toBe("<ul>\n<li>List item</li>\n</ul>")
                });
             });
          });

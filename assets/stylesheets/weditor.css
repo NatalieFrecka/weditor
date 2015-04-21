@@ -20,17 +20,17 @@ html, body {
 	display: none;
 }
 
-input, textarea { 
+.wedit-input { 
 	width: 98.5%; 
 	margin: 0 auto;
 }
 
-input:focus, textarea:focus {
+.wedit-input:focus {
 	outline: none;
 }
 
-.mdm-buttons,
-.mdm-preview {
+.wedit-buttons,
+.wedit-preview {
 	width: 100%;
 	margin: 0 auto;
 	line-height: 1em;
@@ -41,45 +41,47 @@ input:focus, textarea:focus {
 	cursor: pointer;
 }
 
-.mdm-buttons { font-size: 12px; }
-.mdm-buttons ul { 
+.wedit-buttons { font-size: 12px; }
+.wedit-buttons ul { 
 	margin: 10px; 
 	padding-left: 0;
 }
 
-.mdm-buttons ul li{
+.wedit-buttons ul li{
 	display: inline;
 	margin: 0;
 }
 
-.mdm-buttons ul li a{
+.wedit-buttons ul li a{
 	padding: 5px;
 	color: black;
 	text-decoration: none;
 }
 
-.mdm-buttons ul li a span{ display: none; }
+.wedit-buttons ul li a span{ display: none; }
 
-.mdm-buttons ul li a:active{
-	color: #ccc;
+.wedit-buttons ul li a:hover{
+	color: #62676d;
 	position: relative;
 	top: 1px;
 }
 
-.mdm-preview ul {
+.wedit-preview { min-height: 50px; }
+
+.wedit-preview ul {
 	margin-left: 20px;
 	list-style-type: disc;
 }
 
-.mdm-preview strong { font-weight: bold; }
-.mdm-preview em { font-style: italic; }
+.wedit-preview strong { font-weight: bold; }
+.wedit-preview em { font-style: italic; }
 
-.mdm-preview h1,.mdm-preview h2,.mdm-preview h3{ 
+.wedit-preview h1,.wedit-preview h2,.wedit-preview h3{ 
 	padding-left: 5px;
 	font-weight: bold; 
 }
 
-.mdm-preview h1 { font-size: 18px; }
-.mdm-preview h2 { font-size: 14px; }
-.mdm-preview h3 { font-size: 12px; }
-.mdm-preview > p { padding-left: 5px; }
+.wedit-preview h1 { font-size: 18px; }
+.wedit-preview h2 { font-size: 14px; }
+.wedit-preview h3 { font-size: 12px; }
+.wedit-preview > p { padding-left: 5px; }

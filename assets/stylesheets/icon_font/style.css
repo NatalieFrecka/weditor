@@ -9,7 +9,7 @@
 	font-style: normal;
 }
 
-[class^="mdm-icon-"], [class*=" mdm-icon-"] {
+[class^="wedit-icon-"], [class*=" wedit-icon-"] {
 	font-family: 'icomoon';
 	speak: none;
 	font-style: normal;
@@ -23,43 +23,43 @@
 	-moz-osx-font-smoothing: grayscale;
 }
 
-.mdm-icon-undo:before {
+.wedit-icon-undo:before {
 	content: "\e965";
 }
 
-.mdm-icon-redo:before {
+.wedit-icon-redo:before {
 	content: "\e966";
 }
 
-.mdm-icon-quotes-left:before {
+.wedit-icon-quotes-left:before {
 	content: "\e977";
 }
 
-.mdm-icon-list-numbered:before {
+.wedit-icon-list-numbered:before {
 	content: "\e9b9";
 }
 
-.mdm-icon-list2:before {
+.wedit-icon-list2:before {
 	content: "\e9bb";
 }
 
-.mdm-icon-link:before {
+.wedit-icon-link:before {
 	content: "\e9cb";
 }
 
-.mdm-icon-font-size:before {
+.wedit-icon-font-size:before {
 	content: "\ea61";
 }
 
-.mdm-icon-bold:before {
+.wedit-icon-bold:before {
 	content: "\ea62";
 }
 
-.mdm-icon-italic:before {
+.wedit-icon-italic:before {
 	content: "\ea64";
 }
 
-.mdm-icon-pagebreak:before {
+.wedit-icon-pagebreak:before {
 	content: "\ea6e";
 }
 
