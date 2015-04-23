@@ -1,5 +1,6 @@
 function Weditor(inputElement) {
    this.inputElement = $(inputElement);
+   var undoMan = new Weditor.undoManager($(inputElement));
 
    this.initialize = function() {
       this.controlsElement = Weditor.ControlsManager.appendControls(inputElement);
@@ -23,7 +24,7 @@ function Weditor(inputElement) {
 
             Object.keys(keyCodeMap).forEach(function(code) {
                if (keyCodeStr === code) {
-                  keyCodeMap[code](inputElement);
+                  keyCodeMap[code]($(inputElement), undoMan);
                   if (key.preventDefault) key.preventDefault();
                   if (top.event) top.event.returnValue = false;   
                }
@@ -39,6 +40,10 @@ function Weditor(inputElement) {
             }
          }
       });
+
+      Weditor.Utils.addEvent(this.inputElement, "keyup", function() {
+            undoMan.addToStack($(inputElement));
+      });
    };
 
    this.click_on_control = false;
@@ -46,7 +51,7 @@ function Weditor(inputElement) {
    this.activateControls = function(controlsElement) {
       var _self = this;
       ["bold", "italic", "link", "quotes", "title", "olist", "list", "pagebreak", "undo", "redo"].forEach(function(actionName) {
-         $(controlsElement).find(".wedit-" + actionName).click(function(event){_self.action( actionName, event)});
+         $(controlsElement).find(".wedit-" + actionName).click(function(event){_self.action( actionName, event, undoMan)});
       });
    };
 
@@ -78,12 +83,16 @@ function Weditor(inputElement) {
    this.updatePreview = function() {
       var converter = new Attacklab.showdown.converter();
       $(this.previewElement).html(converter.makeHtml($(this.inputElement).val()));
-      if (!$(this.inputElement).val()) $(this.previewElement).css("outline", "1px dashed #FF00E1")
+      if (!$(this.inputElement).val()) {
+         $(this.previewElement).css("outline", "1px dashed #FF00E1");
+      } else {
+         $(this.previewElement).css("outline", "none");
+      }
    };
 
-   this.action = function(actionName, event) {
+   this.action = function(actionName, event, undoManager) {
       event.preventDefault();
-      Weditor.Actions[actionName](this.inputElement);
+      Weditor.Actions[actionName]($(inputElement), undoManager);
       this.updatePreview();
    };
 
@@ -91,8 +100,7 @@ function Weditor(inputElement) {
 }
 
 Weditor.Actions = {
-   bold: function(inputElement) {
-      var inputElement = $(inputElement);
+   bold: function(inputElement, undoManager) {
       var selection = inputElement.caret();
       var text = $.trim(selection.text) || "strong text";
       selection.text = "**" + text + "**";
@@ -100,8 +108,7 @@ Weditor.Actions = {
       Weditor.Utils.setSelection(inputElement, selection, 2, 2);
    },
 
-   italic: function(inputElement) {
-      var inputElement = $(inputElement);
+   italic: function(inputElement, undoManager) {
       var selection = inputElement.caret();
       var text = $.trim(selection.text) || "italic text";
       selection.text = "*" + text + "*";
@@ -109,8 +116,7 @@ Weditor.Actions = {
       Weditor.Utils.setSelection(inputElement, selection, 1, 1);
    },
 
-   link: function(inputElement) {
-      var inputElement = $(inputElement);
+   link: function(inputElement, undoManager) {
       var selection = inputElement.caret();
       var link = prompt( "Link to URL", "http://" );
       var linkNumber = inputElement.parent().next().children().first().children("a").size() + 1;
@@ -125,29 +131,25 @@ Weditor.Actions = {
       }
    },
 
-   quotes: function(inputElement) {
-      var inputElement = $(inputElement);
+   quotes: function(inputElement, undoManager) {
       var selection = inputElement.caret();
       selection = Weditor.Utils.selectWholeLines(inputElement, selection);
       Weditor.ExtendedActions.doBlockquote(inputElement, selection, true);
    },
 
-   olist: function(inputElement) {
-      var inputElement = $(inputElement);
+   olist: function(inputElement, undoManager) {
       var selection = inputElement.caret();
       selection = Weditor.Utils.selectWholeLines(inputElement, selection);
       Weditor.ExtendedActions.doList(inputElement, selection, true, true);
    },
 
-   list: function(inputElement) {
-      var inputElement = $(inputElement);
+   list: function(inputElement, undoManager) {
       var selection = inputElement.caret();
       selection = Weditor.Utils.selectWholeLines(inputElement, selection);
       Weditor.ExtendedActions.doList(inputElement, selection, false, true);
    },
 
-   title: function(inputElement){
-      var inputElement = $(inputElement);
+   title: function(inputElement, undoManager){
       var selection = inputElement.caret();
       var defaultText = "Heading";
       selection = Weditor.Utils.selectWholeLines(inputElement, selection);
@@ -159,21 +161,20 @@ Weditor.Actions = {
       Weditor.Utils.setSelection(inputElement, selection, startTagLength, 0);
    },
 
-   pagebreak: function(inputElement) {
-      var inputElement = $(inputElement);
+   pagebreak: function(inputElement, undoManager) {
       var selection = inputElement.caret();
       selection.text = "\n\n----------\n";
       Weditor.Utils.replaceSelection(inputElement, selection);
    },
 
-   undo: function(inputElement) {
-      alert("Undo is not yet functional");
-      console.log("UNDO")
+   undo: function(inputElement, undoManager) {
+      undoManager.undo(inputElement);
+      Weditor.PreviewManager.refreshPreview(inputElement);
    },
 
-   redo: function(inputElement) {
-      alert("Redo is not yet functional");
-      console.log("REDO")
+   redo: function(inputElement, undoManager) {
+      undoManager.redo(inputElement);
+      Weditor.PreviewManager.refreshPreview(inputElement);
    }
 }
 
@@ -336,6 +337,48 @@ Weditor.PreviewManager = {
       preview.html(converter.makeHtml(inputElement.val()));
    }
 }
+
+// Problems with undo manager:
+// setInitialStack sets values from every input on page
+// addToStack needs to be triggered less often. Every keyup is dumb.
+// OR need to add a method that determines whether change is significant enough
+
+Weditor.undoManager = function(inputElement) {
+   var undoStack = [];
+   var stackIndex = 0;
+
+   var initialize = function(inputElement) {
+      undoStack.push(inputElement.val());
+      console.log(undoStack)
+   };
+
+   this.addToStack = function(inputElement) {
+      if (undoStack[undoStack.length - 1] != inputElement.val()) {
+         undoStack.push(inputElement.val());
+         stackIndex++;
+         console.log(undoStack)
+         console.log(stackIndex)
+      }
+   };
+
+   this.undo = function(inputElement) {
+      if (undoStack[stackIndex]) {
+         stackIndex--;
+         inputElement.val(undoStack[stackIndex])
+         console.log(stackIndex)
+      }
+   };
+
+   this.redo = function(inputElement) {
+      if (undoStack[stackIndex + 1]) {
+         stackIndex++;
+         inputElement.val(undoStack[stackIndex]);
+         console.log(stackIndex)
+      }
+   };
+
+   initialize(inputElement);
+};
 
 Weditor.Utils = {
    addEvent: function(elem, event, listener) {
