@@ -1,6 +1,7 @@
 function Weditor(inputElement) {
    this.inputElement = $(inputElement);
-   var undoMan = new Weditor.undoManager($(inputElement));
+   this.click_on_control = false;
+   var undoMan = new Weditor.undoManager(this.inputElement);
 
    this.initialize = function() {
       this.controlsElement = Weditor.ControlsManager.appendControls(inputElement);
@@ -9,48 +10,14 @@ function Weditor(inputElement) {
       this.activatePreview(this.inputElement, this.previewElement);
       this.activateControls(this.controlsElement);
       this.activateInput(this.inputElement, this.controlsElement, this.previewElement);
+      this.activateKeyEvents(this.inputElement);
 
       this.updatePreview();
-
-      Weditor.Utils.addEvent(this.inputElement, "keydown", function(key) {
-         var keyCodeMap = {"b": Weditor.Actions.bold, "i": Weditor.Actions.italic, "l": Weditor.Actions.link, 
-                           "q": Weditor.Actions.quotes, "o": Weditor.Actions.olist, "u": Weditor.Actions.list, 
-                           "h": Weditor.Actions.title, "r": Weditor.Actions.pagebreak, "y": Weditor.Actions.redo,
-                           "z": key.shiftKey ? Weditor.Actions.redo : Weditor.Actions.undo}
-
-         if (key.ctrlKey || key.metaKey) {
-            var keyCode = key.charCode || key.keyCode;
-            var keyCodeStr = String.fromCharCode(keyCode).toLowerCase();
-
-            Object.keys(keyCodeMap).forEach(function(code) {
-               if (keyCodeStr === code) {
-                  keyCodeMap[code]($(inputElement), undoMan);
-                  if (key.preventDefault) key.preventDefault();
-                  if (top.event) top.event.returnValue = false;   
-               }
-            });
-         }
-      });
-
-      Weditor.Utils.addEvent(this.inputElement, "keyup", function(key) {
-         if (!key.shiftKey && !key.ctrlKey && !key.metaKey) {
-            var keyCode = key.charCode || key.keyCode;
-            if (keyCode === 13) {
-               Weditor.Utils.doAutoindent($(inputElement), $(inputElement).caret());
-            }
-         }
-      });
-
-      Weditor.Utils.addEvent(this.inputElement, "keyup", function() {
-            undoMan.addToStack($(inputElement));
-      });
    };
-
-   this.click_on_control = false;
 
    this.activateControls = function(controlsElement) {
       var _self = this;
-      ["bold", "italic", "link", "quotes", "title", "olist", "list", "pagebreak", "undo", "redo"].forEach(function(actionName) {
+      ["bold", "italic", "link", "quotes", "olist", "list", "heading", "pagebreak", "undo", "redo"].forEach(function(actionName) {
          $(controlsElement).find(".wedit-" + actionName).click(function(event){_self.action( actionName, event, undoMan)});
       });
    };
@@ -77,6 +44,48 @@ function Weditor(inputElement) {
          if (!_self.click_on_control) {
             $(this).parent().slideUp();
          }
+      });
+   };
+
+   this.activateKeyEvents = function(inputElement) {
+      var addEvent = function(elem, event, listener) {
+         if (elem.attachEvent) {
+            elem.attachEvent("on" + event, listener);
+         } else {
+            elem.on(event, listener);
+         }
+      };
+
+      addEvent(inputElement, "keydown", function(key) {
+         var keyCodeMap = {"b": Weditor.Actions.bold, "i": Weditor.Actions.italic, "l": Weditor.Actions.link, 
+                           "q": Weditor.Actions.quotes, "o": Weditor.Actions.olist, "u": Weditor.Actions.list, 
+                           "h": Weditor.Actions.heading, "r": Weditor.Actions.pagebreak, "y": Weditor.Actions.redo,
+                           "z": key.shiftKey ? Weditor.Actions.redo : Weditor.Actions.undo}
+
+         if (key.ctrlKey || key.metaKey) {
+            var keyCode = key.charCode || key.keyCode;
+            var keyCodeStr = String.fromCharCode(keyCode).toLowerCase();
+
+            Object.keys(keyCodeMap).forEach(function(code) {
+               if (keyCodeStr === code) {
+                  keyCodeMap[code]($(inputElement), undoMan);
+                  if (key.preventDefault) key.preventDefault();
+                  if (top.event) top.event.returnValue = false;   
+               }
+            });
+         }
+      });
+
+      addEvent(inputElement, "keyup", function(key) {
+         if (!key.shiftKey && !key.ctrlKey && !key.metaKey) {
+            var keyCode = key.charCode || key.keyCode;
+            if (keyCode === 13) {
+               Weditor.Utils.doAutoindent($(inputElement), $(inputElement).caret());
+            }
+         }
+
+         //  FIX THIS. THIS IS DUMB!
+         undoMan.addToStack();
       });
    };
 
@@ -149,7 +158,7 @@ Weditor.Actions = {
       Weditor.ExtendedActions.doList(inputElement, selection, false, true);
    },
 
-   title: function(inputElement, undoManager){
+   heading: function(inputElement, undoManager){
       var selection = inputElement.caret();
       var defaultText = "Heading";
       selection = Weditor.Utils.selectWholeLines(inputElement, selection);
@@ -168,12 +177,12 @@ Weditor.Actions = {
    },
 
    undo: function(inputElement, undoManager) {
-      undoManager.undo(inputElement);
+      undoManager.undo();
       Weditor.PreviewManager.refreshPreview(inputElement);
    },
 
    redo: function(inputElement, undoManager) {
-      undoManager.redo(inputElement);
+      undoManager.redo();
       Weditor.PreviewManager.refreshPreview(inputElement);
    }
 }
@@ -303,7 +312,7 @@ Weditor.ControlsManager = {
       "    <li class=\"wedit-quotes\" title=\"Blockquote <blockquote> Ctrl+Q\"><a class=\"wedit-icon-quotes-left\" href=\"#wedit-quotes\"><span>q</span></a></li>" +
       "    <li class=\"wedit-olist\" title=\"Numbered List <ol> Ctrl+O\"><a class=\"wedit-icon-list-numbered\" href=\"#wedit-olist\"><span>ol</span></a></li>" +
       "    <li class=\"wedit-list\" title=\"Bulleted List <ul> Ctrl+U\"><a class=\"wedit-icon-list2\" href=\"#wedit-list\"><span>ul</span></a></li>" +
-      "    <li class=\"wedit-title\" title=\"Heading <h1>/<h2> Ctrl+H\"><a class=\"wedit-icon-font-size\" href=\"#wedit-title\"><span>T</span></a></li>" +
+      "    <li class=\"wedit-heading\" title=\"Heading <h1>/<h2> Ctrl+H\"><a class=\"wedit-icon-font-size\" href=\"#wedit-heading\"><span>T</span></a></li>" +
       "    <li class=\"wedit-pagebreak\" title=\"Horizontal Rule <hr> Ctrl+R\"><a class=\"wedit-icon-pagebreak\" href=\"#wedit-pagebreak\"><span>hr</span></a></li>" +
       "    <li class=\"wedit-undo\" title=\"Undo - Ctrl+Z\"><a class=\"wedit-icon-undo\" href=\"#wedit-undo\"><span>z</span></a></li>" +
       "    <li class=\"wedit-redo\" title=\"Redo - Ctrl+Shift+Z\"><a class=\"wedit-icon-redo\" href=\"#wedit-redo\"><span>y</span></a></li>" +
@@ -347,12 +356,12 @@ Weditor.undoManager = function(inputElement) {
    var undoStack = [];
    var stackIndex = 0;
 
-   var initialize = function(inputElement) {
+   var initialize = function() {
       undoStack.push(inputElement.val());
       console.log(undoStack)
    };
 
-   this.addToStack = function(inputElement) {
+   this.addToStack = function() {
       if (undoStack[undoStack.length - 1] != inputElement.val()) {
          undoStack.push(inputElement.val());
          stackIndex++;
@@ -361,7 +370,7 @@ Weditor.undoManager = function(inputElement) {
       }
    };
 
-   this.undo = function(inputElement) {
+   this.undo = function() {
       if (undoStack[stackIndex]) {
          stackIndex--;
          inputElement.val(undoStack[stackIndex])
@@ -369,7 +378,7 @@ Weditor.undoManager = function(inputElement) {
       }
    };
 
-   this.redo = function(inputElement) {
+   this.redo = function() {
       if (undoStack[stackIndex + 1]) {
          stackIndex++;
          inputElement.val(undoStack[stackIndex]);
@@ -377,18 +386,10 @@ Weditor.undoManager = function(inputElement) {
       }
    };
 
-   initialize(inputElement);
+   initialize();
 };
 
 Weditor.Utils = {
-   addEvent: function(elem, event, listener) {
-      if (elem.attachEvent) {
-         elem.attachEvent("on" + event, listener);
-      } else {
-         elem.on(event, listener);
-      }
-   },
-
    doAutoindent: function(inputElement, selection) {
       var before = inputElement.val().substring(0, selection.start);
       before = before.replace(/(\n|^)[ ]{0,3}([*+-]|\d+[.])[ \t]*\n$/, "\n\n");

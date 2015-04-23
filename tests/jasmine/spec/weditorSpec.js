@@ -229,9 +229,9 @@ describe("Weditor", function() {
             });
          });
 
-         describe("when Title button is clicked with no selection", function() {
+         describe("when Heading button is clicked with no selection", function() {
             beforeEach(function() {
-               $(".wedit-title").click();
+               $(".wedit-heading").click();
             });
 
             it("should insert the default header text at cursor", function() {
@@ -246,9 +246,9 @@ describe("Weditor", function() {
                expect(jQuery.fn.setSelection).toHaveBeenCalledWith(2, 9);
             });
 
-            describe("when Title button is clicked second time", function() {
+            describe("when Heading button is clicked second time", function() {
                beforeEach(function() {
-                  $(".wedit-title").click();
+                  $(".wedit-heading").click();
                });
 
                it("should add second hash symbol", function() {
@@ -394,9 +394,9 @@ describe("Weditor", function() {
                });
             });
 
-            describe("when Title button is clicked", function() {
+            describe("when Heading button is clicked", function() {
                beforeEach(function() {
-                  $(".wedit-title").click();
+                  $(".wedit-heading").click();
                });
 
                it("should add a hash to the whole line", function() {
@@ -411,9 +411,9 @@ describe("Weditor", function() {
                   expect(jQuery.fn.setSelection).toHaveBeenCalledWith(2, 27);
                });
 
-               describe("when Title button is clicked second time", function() {
+               describe("when Heading button is clicked second time", function() {
                   beforeEach(function() {
-                     $(".wedit-title").click();
+                     $(".wedit-heading").click();
                   });
 
                   it("should add second hash symbol", function() {
@@ -680,15 +680,15 @@ describe("Weditor", function() {
                });
             });
 
-            describe("title shortcut", function() {
+            describe("heading shortcut", function() {
                beforeEach(function() {
-                  spyOn(Weditor.Actions, "title");
+                  spyOn(Weditor.Actions, "heading");
                   keypress.keyCode = 72;
                   $("#it").trigger(keypress);
                });
 
-               it("should call the title action", function() {
-                  expect(Weditor.Actions.title).toHaveBeenCalled();
+               it("should call the heading action", function() {
+                  expect(Weditor.Actions.heading).toHaveBeenCalled();
                });
             });
 
