@@ -8,6 +8,7 @@ Weditor is a fusion of [MDMagick][1] and derobins' branch of [wmd][2]. I wanted 
 
 ## Dependencies
  - jquery
+ - jquery ui
  - [jcaret][3]
  - [jquery broswer plugin][4]
  - [showdownt][5]
