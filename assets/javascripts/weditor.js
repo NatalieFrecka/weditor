@@ -1,7 +1,7 @@
 function Weditor(inputElement) {
    this.inputElement = $(inputElement);
    this.click_on_control = false;
-   var undoMan = new Weditor.undoManager(this.inputElement);
+   var undoMan = new Weditor.UndoManager(this.inputElement);
 
    this.initialize = function() {
       this.controlsElement = Weditor.ControlsManager.appendControls(inputElement);
@@ -48,6 +48,9 @@ function Weditor(inputElement) {
    };
 
    this.activateKeyEvents = function(inputElement) {
+      var typingTimer;
+      var timeInterval = 2000;
+
       var addEvent = function(elem, event, listener) {
          if (elem.attachEvent) {
             elem.attachEvent("on" + event, listener);
@@ -74,18 +77,26 @@ function Weditor(inputElement) {
                }
             });
          }
+         
+         clearTimeout(typingTimer);
       });
 
       addEvent(inputElement, "keyup", function(key) {
+         var keyCode = key.charCode || key.keyCode;
+
          if (!key.shiftKey && !key.ctrlKey && !key.metaKey) {
-            var keyCode = key.charCode || key.keyCode;
             if (keyCode === 13) {
-               Weditor.Utils.doAutoindent($(inputElement), $(inputElement).caret());
+               Weditor.Utils.doAutoindent(inputElement, inputElement.caret());
             }
          }
 
-         //  FIX THIS. THIS IS DUMB!
-         undoMan.addToStack();
+         if (keyCode === 13 || keyCode === 32 || keyCode === 8 || (keyCode === 190 && !key.shiftKey) || (keyCode === 191 && key.shiftKey)) {
+            undoMan.addToStack();
+         }
+
+         clearTimeout(typingTimer);
+         typingTimer = setTimeout(undoMan.addToStack, timeInterval);
+         
       });
    };
 
@@ -102,7 +113,9 @@ function Weditor(inputElement) {
    this.action = function(actionName, event, undoManager) {
       event.preventDefault();
       Weditor.Actions[actionName]($(inputElement), undoManager);
-      this.updatePreview();
+      if (actionName != "undo" && actionName != "redo") {
+         this.updatePreview();
+      }
    };
 
    this.initialize();
@@ -110,22 +123,27 @@ function Weditor(inputElement) {
 
 Weditor.Actions = {
    bold: function(inputElement, undoManager) {
+      undoManager.addToStack();
       var selection = inputElement.caret();
       var text = $.trim(selection.text) || "strong text";
       selection.text = "**" + text + "**";
       Weditor.Utils.replaceSelection(inputElement, selection);
       Weditor.Utils.setSelection(inputElement, selection, 2, 2);
+      undoManager.addToStack();
    },
 
    italic: function(inputElement, undoManager) {
+      undoManager.addToStack();
       var selection = inputElement.caret();
       var text = $.trim(selection.text) || "italic text";
       selection.text = "*" + text + "*";
       Weditor.Utils.replaceSelection(inputElement, selection);
       Weditor.Utils.setSelection(inputElement, selection, 1, 1);
+      undoManager.addToStack();
    },
 
    link: function(inputElement, undoManager) {
+      undoManager.addToStack();
       var selection = inputElement.caret();
       var link = prompt( "Link to URL", "http://" );
       var linkNumber = inputElement.parent().next().children().first().children("a").size() + 1;
@@ -138,27 +156,35 @@ Weditor.Actions = {
          inputElement.val(inputElement.val() + postfix);
          Weditor.Utils.setSelection(inputElement, selection, 1, endTagLength);
       }
+      undoManager.addToStack();
    },
 
    quotes: function(inputElement, undoManager) {
+      undoManager.addToStack();
       var selection = inputElement.caret();
       selection = Weditor.Utils.selectWholeLines(inputElement, selection);
       Weditor.ExtendedActions.doBlockquote(inputElement, selection, true);
+      undoManager.addToStack();
    },
 
    olist: function(inputElement, undoManager) {
+      undoManager.addToStack();
       var selection = inputElement.caret();
       selection = Weditor.Utils.selectWholeLines(inputElement, selection);
       Weditor.ExtendedActions.doList(inputElement, selection, true, true);
+      undoManager.addToStack();
    },
 
    list: function(inputElement, undoManager) {
+      undoManager.addToStack();
       var selection = inputElement.caret();
       selection = Weditor.Utils.selectWholeLines(inputElement, selection);
       Weditor.ExtendedActions.doList(inputElement, selection, false, true);
+      undoManager.addToStack();
    },
 
    heading: function(inputElement, undoManager){
+      undoManager.addToStack();
       var selection = inputElement.caret();
       var defaultText = "Heading";
       selection = Weditor.Utils.selectWholeLines(inputElement, selection);
@@ -168,22 +194,23 @@ Weditor.Actions = {
       var startTagLength = (selection.text.match(/#/g) || []).length + 1;
       Weditor.Utils.replaceSelection(inputElement, selection);
       Weditor.Utils.setSelection(inputElement, selection, startTagLength, 0);
+      undoManager.addToStack();
    },
 
    pagebreak: function(inputElement, undoManager) {
+      undoManager.addToStack();
       var selection = inputElement.caret();
       selection.text = "\n\n----------\n";
       Weditor.Utils.replaceSelection(inputElement, selection);
+      undoManager.addToStack();
    },
 
    undo: function(inputElement, undoManager) {
       undoManager.undo();
-      Weditor.PreviewManager.refreshPreview(inputElement);
    },
 
    redo: function(inputElement, undoManager) {
       undoManager.redo();
-      Weditor.PreviewManager.refreshPreview(inputElement);
    }
 }
 
@@ -347,48 +374,6 @@ Weditor.PreviewManager = {
    }
 }
 
-// Problems with undo manager:
-// setInitialStack sets values from every input on page
-// addToStack needs to be triggered less often. Every keyup is dumb.
-// OR need to add a method that determines whether change is significant enough
-
-Weditor.undoManager = function(inputElement) {
-   var undoStack = [];
-   var stackIndex = 0;
-
-   var initialize = function() {
-      undoStack.push(inputElement.val());
-      console.log(undoStack)
-   };
-
-   this.addToStack = function() {
-      if (undoStack[undoStack.length - 1] != inputElement.val()) {
-         undoStack.push(inputElement.val());
-         stackIndex++;
-         console.log(undoStack)
-         console.log(stackIndex)
-      }
-   };
-
-   this.undo = function() {
-      if (undoStack[stackIndex]) {
-         stackIndex--;
-         inputElement.val(undoStack[stackIndex])
-         console.log(stackIndex)
-      }
-   };
-
-   this.redo = function() {
-      if (undoStack[stackIndex + 1]) {
-         stackIndex++;
-         inputElement.val(undoStack[stackIndex]);
-         console.log(stackIndex)
-      }
-   };
-
-   initialize();
-};
-
 Weditor.Utils = {
    doAutoindent: function(inputElement, selection) {
       var before = inputElement.val().substring(0, selection.start);
@@ -441,8 +426,105 @@ Weditor.Utils = {
 
       inputElement.setSelection(start, end);
       Weditor.PreviewManager.refreshPreview(inputElement);
+   },
+
+   waitforpastedata: function(inputElement,savedcontent) {
+      if (inputElement.childNodes && inputElement.childNodes.length > 0) {
+         Weditor.Utils.processpaste(inputElement, savedcontent);
+      } else {
+           that = {
+               e: inputElement,
+               s: savedcontent
+           }
+           that.callself = function () {
+               Weditor.Utils.waitforpastedata(that.e, that.s)
+           }
+           setTimeout(that.callself,20);
+       }
+   },
+
+   processpaste: function(inputElement, savedcontent) {
+       pasteddata = inputElement.innerHTML;
+       inputElement.innerHTML = savedcontent;
+
+       alert(pasteddata);
+   },
+
+   handlePaste: function(inputElement, event) {
+      var savedcontent = inputElement.innerHTML;
+      // undoMan.addToStack();
+         console.log(event)
+
+      if (event && event.clipboardData && event.clipboardData.getData) {
+         if (/text\/html/.test(event.clipboardData.types)) {
+            inputElement.innerHTML = event.clipboardData.getData('text/html');
+         } else if (/text\/plain/.test(event.clipboardData.types)) {
+            inputElement.innerHTML = event.clipboardData.getData('text/plain');
+         } else {
+            inputElement.innerHTML = "";
+         }
+
+         Weditor.Utils.waitforpastedata(inputElement, savedcontent);
+         
+         if (event.preventDefault) {
+             event.stopPropagation();
+             event.preventDefault();
+         }
+
+         return false;
+      } else {
+         inputElement.innerHTML = "";
+         Weditor.Utils.waitforpastedata(inputElement, savedcontent);
+         return true;
+      }
    }
 }
+
+// Problems with undo manager:
+// Must limit undoStack length? Maybe to 0-99
+// addToStack needs to be triggered less often. Every keyup is dumb.
+// OR need to add a method that determines whether change is significant enough
+
+// Current plan: trigger add on punctuation, delete, enter, style change, maybe spacebar
+// Set timeout to trigger add after 30 seconds
+
+Weditor.UndoManager = function(inputElement) {
+   var undoStack = [];
+   var stackIndex;
+
+   var initialize = function() {
+      undoStack.push(inputElement.val());
+      stackIndex = 0;
+   };
+
+   this.addToStack = function() {
+      // console.log("stack: " + undoStack[undoStack.length - 1])
+      // console.log("val: " + inputElement.val())
+      if (undoStack[undoStack.length - 1] != inputElement.val()) {
+         undoStack.push(inputElement.val());
+         stackIndex++;
+         console.log("added")
+      }
+   };
+
+   this.undo = function() {
+      if (undoStack[stackIndex - 1] !== null) {
+         stackIndex--;
+         inputElement.val(undoStack[stackIndex]);
+         Weditor.PreviewManager.refreshPreview(inputElement);
+      }
+   };
+
+   this.redo = function() {
+      if (undoStack[stackIndex + 1] != null) {
+         stackIndex++;
+         inputElement.val(undoStack[stackIndex]);
+         Weditor.PreviewManager.refreshPreview(inputElement);
+      }
+   };
+
+   initialize();
+};
 
 $(function() {
    jQuery.fn.weditThis = function() {

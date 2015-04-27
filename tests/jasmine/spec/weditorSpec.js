@@ -73,7 +73,7 @@ describe("Weditor", function() {
             });
          });
 
-         describe("when Bold button is clicked with no selection", function() {
+         describe("when the Bold button is clicked with no selection", function() {
             beforeEach(function() {
                $(".wedit-bold").click();
             });
@@ -91,7 +91,7 @@ describe("Weditor", function() {
             });
          });
 
-         describe("when Italics button is clicked with no selection", function() {
+         describe("when the Italics button is clicked with no selection", function() {
             beforeEach(function() {
                $(".wedit-italic").click();
             });
@@ -109,7 +109,7 @@ describe("Weditor", function() {
             });
          });
 
-         describe("when Link button is clicked with no selection", function() {
+         describe("when the Link button is clicked with no selection", function() {
             beforeEach(function() {
                spyOn(window, 'prompt').and.returnValue("http://www.google.com");
                $(".wedit-link").click();
@@ -143,7 +143,7 @@ describe("Weditor", function() {
             });
          });
 
-         describe("when Quotes button is clicked with no selection", function() {
+         describe("when the Quotes button is clicked with no selection", function() {
             beforeEach(function() {
                $(".wedit-quotes").click();
             });
@@ -161,7 +161,7 @@ describe("Weditor", function() {
             });
          });
 
-         describe("when Ordered List button is clicked with no selection", function() {
+         describe("when the Ordered List button is clicked with no selection", function() {
             beforeEach(function() {
                $(".wedit-olist").click();
             });
@@ -195,7 +195,7 @@ describe("Weditor", function() {
             });
          });
 
-         describe("when Unordered List button is clicked with no selection", function() {
+         describe("when the Unordered List button is clicked with no selection", function() {
             beforeEach(function() {
                $(".wedit-list").click();
             });
@@ -229,7 +229,7 @@ describe("Weditor", function() {
             });
          });
 
-         describe("when Heading button is clicked with no selection", function() {
+         describe("when the Heading button is clicked with no selection", function() {
             beforeEach(function() {
                $(".wedit-heading").click();
             });
@@ -265,7 +265,7 @@ describe("Weditor", function() {
             });
          });
 
-         describe("when Pagebreak button is clicked with no selection", function() {
+         describe("when the Pagebreak button is clicked with no selection", function() {
             beforeEach(function() {
                $(".wedit-pagebreak").click();
             });
@@ -276,6 +276,113 @@ describe("Weditor", function() {
 
             it("should update the preview div", function() {
                expect($(".wedit-preview").html()).toBe('<hr>');
+            });
+         });
+
+         describe("when the Undo button is clicked", function() {
+            beforeEach(function() {
+               $(".wedit-bold").click();
+               $(".wedit-italic").click();
+               $(".wedit-undo").click();
+            });
+
+            it("should set the input value to the previous index of the undo stack", function() {
+               expect($("#it").val()).toBe("**strong text**");
+            });
+
+            describe("when the Undo button is clicked twice", function() {
+               beforeEach(function() {
+                  $(".wedit-undo").click();
+               });
+
+               it("should undo again", function() {
+                  expect($("#it").val()).toBe("");
+               });
+
+               describe("when the Redo button is clicked", function() {
+                  beforeEach(function() {
+                     $(".wedit-redo").click();
+                  });
+
+                  it("should set the input value to the next index of the undo stack", function() {
+                     expect($("#it").val()).toBe("**strong text**");
+                  });
+
+                  describe("clicking the redo button a second time", function() {
+                     beforeEach(function() {
+                        $(".wedit-redo").click();
+                     });
+
+                     it("should continue through the undo stack", function() {
+                        expect($("#it").val()).toBe("**strong text***italic text*");
+                     });
+                  });
+               });
+            });
+         });
+
+         describe("when user stops typing for two seconds", function() {
+            var keypress = $.Event('keyup');
+            var simulateUserInput = function(text) {
+               $("#it").val(text);
+               $("#it").trigger(keypress);
+               jasmine.clock().tick(2000);
+            };
+
+            beforeEach(function() {
+               jasmine.clock().install();
+               simulateUserInput("I typed something");
+               simulateUserInput("I typed something else");
+               $(".wedit-undo").click();
+            });
+
+            afterEach(function() {
+               jasmine.clock().uninstall();
+            });
+
+            it("should save text state and allow user to undo", function() {
+               expect($("#it").val()).toBe("I typed something");
+            });
+         });
+
+         describe("when user pastes content into window", function() {
+            var keypress = $.Event('keydown');
+            keypress.keyCode = 86;
+            keypress.metaKey = true;
+            
+            beforeEach(function() {
+               $("#it").val("My content is great.");
+               $("#it").trigger(keypress);
+               $("#it").val("My content is great. I mean it.");
+               $("#it").trigger(keypress);
+
+               $(".wedit-undo").click();
+            });
+
+            it("should save the state and allow user to undo", function() {
+               expect($("#it").val()).toBe("My content is great.");
+            });
+         });
+
+         describe("clicking the undo button when there is nothing to undo", function() {
+            beforeEach(function() {
+               $(".wedit-undo").click();
+               spyOn(jQuery.fn, "val");
+            });
+
+            it("should do nothing", function() {
+               expect(jQuery.fn.val.calls.any()).toEqual(false);
+            });
+         });
+
+         describe("clicking the redo button when there is nothing to redo", function() {
+            beforeEach(function() {
+               spyOn(jQuery.fn, "val");
+               $(".wedit-redo").click();
+            });
+
+            it("should do nothing when there is nothing to redo", function() {
+               expect(jQuery.fn.val.calls.any()).toEqual(false);
             });
          });
 
@@ -706,7 +813,6 @@ describe("Weditor", function() {
 
             describe("redo shortcut", function() {
                beforeEach(function() {
-                  spyOn(window, 'alert').and.returnValue(true);
                   spyOn(Weditor.Actions, "redo");
                   keypress.keyCode = 89;
                   $("#it").trigger(keypress);
@@ -719,7 +825,6 @@ describe("Weditor", function() {
 
             describe("undo shortcut", function() {
                beforeEach(function() {
-                  spyOn(window, 'alert').and.returnValue(true);
                   spyOn(Weditor.Actions, "undo");
                   keypress.keyCode = 90;
                   $("#it").trigger(keypress);
@@ -732,7 +837,6 @@ describe("Weditor", function() {
 
             describe("alternate redo shortcut", function() {
                beforeEach(function() {
-                  spyOn(window, 'alert').and.returnValue(true);
                   spyOn(Weditor.Actions, "redo");
                   keypress.shiftKey = true;
                   keypress.keyCode = 90;
