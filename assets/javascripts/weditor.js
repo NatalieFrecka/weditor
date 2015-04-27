@@ -88,8 +88,11 @@ function Weditor(inputElement) {
 
       addEvent(inputElement, "keyup", function(key) {
          var keyCode = key.charCode || key.keyCode;
+         var exclamation = (keyCode === 49 && key.shiftKey);
+         var comma = (keyCode === 188 && !key.shiftKey);
          var period = (keyCode === 190 && !key.shiftKey);
-         var comma = (keyCode === 191 && !key.shiftKey);
+         var question = (keyCode === 191 && key.shiftKey);
+
 
          if (keyCode === 13) {
             undoMan.addToStack();
@@ -98,7 +101,7 @@ function Weditor(inputElement) {
                Weditor.Utils.doAutoindent(inputElement, inputElement.caret());
                undoMan.addToStack();
             }
-         } else if (keyCode === 32 || keyCode === 8 || period || comma) {
+         } else if (keyCode === 32 || keyCode === 8 || exclamation || comma || period || question) {
             undoMan.addToStack();
          }
       });
@@ -149,8 +152,9 @@ Weditor.Actions = {
    link: function(inputElement, undoManager) {
       undoManager.addToStack();
       var selection = inputElement.caret();
+      console.log(selection)
       var link = prompt( "Link to URL", "http://" );
-      var linkNumber = inputElement.parent().next().children().first().children("a").size() + 1;
+      var linkNumber = inputElement.parent().next().find("a").size() + 1;
       var postfix = "\n[" + linkNumber + "]: " + link;
       if (link) {
          var text = $.trim(selection.text) || "link text";

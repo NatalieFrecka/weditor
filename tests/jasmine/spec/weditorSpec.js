@@ -42,6 +42,7 @@ describe("Weditor", function() {
 
       describe("clicking the preview box", function() {
          beforeEach(function() {
+            spyOn(window, 'prompt').and.returnValue("http://www.google.com");
             spyOn(jQuery.fn, "setSelection");
             $(".wedit-preview").click();
          });
@@ -111,7 +112,6 @@ describe("Weditor", function() {
 
          describe("when the Link button is clicked with no selection", function() {
             beforeEach(function() {
-               spyOn(window, 'prompt').and.returnValue("http://www.google.com");
                $(".wedit-link").click();
             });
 
@@ -133,13 +133,30 @@ describe("Weditor", function() {
                   $(".wedit-link").click();
                });
 
-               it("should insert the default link text at cursor", function() {
+               it("should insert the default link text at cursor with the link number 2", function() {
                   expect($("#it").val()).toBe("[link text][1][link text][2]\n[1]: http://www.google.com\n[2]: http://www.google.com");
                });
 
                it("should update the preview div", function() {
                   expect($(".wedit-preview").html()).toBe('<p><a href="http://www.google.com">link text</a><a href="http://www.google.com">link text</a></p>');
                });
+            });
+         });
+
+         describe("when a second link is added with a paragraph separating it and the first", function() {
+            beforeEach(function() {
+               spyOn(jQuery.fn, "caret").and.returnValue({start: 32, end: 32, text: ""});
+               $("#it").val("[link text][1]\n\nParagraph text\n\n\n[1]: http://www.google.com")
+               $(".wedit-preview").html('<p><a href="http://www.google.com">link text</a></p><p>Paragraph text</p>')
+               $(".wedit-link").click();
+            });
+
+            it("should insert the default link text at cursor with the link number 2", function() {
+               expect($("#it").val()).toBe("[link text][1]\n\nParagraph text\n\n[link text][2]\n[1]: http://www.google.com\n[2]: http://www.google.com");
+            });
+
+            it("should update the preview div", function() {
+               expect($(".wedit-preview").html()).toBe('<p><a href="http://www.google.com">link text</a></p>\n\n<p>Paragraph text</p>\n\n<p><a href="http://www.google.com">link text</a></p>');
             });
          });
 
@@ -403,7 +420,6 @@ describe("Weditor", function() {
 
             describe("when Link button is clicked", function() {
                beforeEach(function() {
-                  spyOn(window, 'prompt').and.returnValue("http://www.google.com");
                   $(".wedit-link").click();
                });
 
