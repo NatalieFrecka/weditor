@@ -337,30 +337,6 @@ describe("Weditor", function() {
             });
          });
 
-         describe("when user stops typing for two seconds", function() {
-            var keypress = $.Event('keyup');
-            var simulateUserInput = function(text) {
-               $("#it").val(text);
-               $("#it").trigger(keypress);
-               jasmine.clock().tick(2000);
-            };
-
-            beforeEach(function() {
-               jasmine.clock().install();
-               simulateUserInput("I typed something");
-               simulateUserInput("I typed something else");
-               $(".wedit-undo").click();
-            });
-
-            afterEach(function() {
-               jasmine.clock().uninstall();
-            });
-
-            it("should save text state and allow user to undo", function() {
-               expect($("#it").val()).toBe("I typed something");
-            });
-         });
-
          describe("clicking the undo button when there is nothing to undo", function() {
             beforeEach(function() {
                $(".wedit-undo").click();

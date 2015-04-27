@@ -48,9 +48,6 @@ function Weditor(inputElement) {
    };
 
    this.handleInputEvents = function(inputElement) {
-      var typingTimer;
-      var timeInterval = 2000;
-
       var addEvent = function(elem, event, listener) {
          if (elem.attachEvent) {
             elem.attachEvent("on" + event, listener);
@@ -87,8 +84,6 @@ function Weditor(inputElement) {
                }
             });
          }
-         
-         clearTimeout(typingTimer);
       });
 
       addEvent(inputElement, "keyup", function(key) {
@@ -106,9 +101,6 @@ function Weditor(inputElement) {
          } else if (keyCode === 32 || keyCode === 8 || period || comma) {
             undoMan.addToStack();
          }
-
-         clearTimeout(typingTimer);
-         typingTimer = setTimeout(undoMan.addToStack, timeInterval);
       });
    };
 
@@ -219,10 +211,12 @@ Weditor.Actions = {
 
    undo: function(inputElement, undoManager) {
       undoManager.undo();
+      inputElement.focus();
    },
 
    redo: function(inputElement, undoManager) {
       undoManager.redo();
+      inputElement.focus();
    }
 }
 
@@ -451,14 +445,25 @@ Weditor.UndoManager = function(inputElement) {
    };
 
    this.addToStack = function() {
-      if (undoStack[undoStack.length - 1] != inputElement.val()) {
-         undoStack.push(inputElement.val());
+      if (undoStack[stackIndex] != inputElement.val()) {
          stackIndex++;
+         undoStack[stackIndex] = inputElement.val();
+         if (undoStack[stackIndex] === undoStack[stackIndex -1]) {
+            undoStack = undoStack.splice(0, stackIndex);
+         } else {
+            undoStack = undoStack.splice(0, stackIndex + 1);
+         }
+
+         stackIndex = undoStack.length - 1;
       }
    };
 
    this.undo = function() {
-      if (undoStack[stackIndex - 1] !== null) {
+      if (!stackIndex - 1 < 0) {
+         if (stackIndex === undoStack.length - 1) {
+            this.addToStack();
+         }
+
          stackIndex--;
          inputElement.val(undoStack[stackIndex]);
          Weditor.PreviewManager.refreshPreview(inputElement);
