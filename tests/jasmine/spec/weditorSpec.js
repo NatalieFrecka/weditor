@@ -73,7 +73,7 @@ describe("Weditor", function() {
             });
          });
 
-         describe("when Bold button is clicked with no selection", function() {
+         describe("when the Bold button is clicked with no selection", function() {
             beforeEach(function() {
                $(".wedit-bold").click();
             });
@@ -91,7 +91,7 @@ describe("Weditor", function() {
             });
          });
 
-         describe("when Italics button is clicked with no selection", function() {
+         describe("when the Italics button is clicked with no selection", function() {
             beforeEach(function() {
                $(".wedit-italic").click();
             });
@@ -109,7 +109,7 @@ describe("Weditor", function() {
             });
          });
 
-         describe("when Link button is clicked with no selection", function() {
+         describe("when the Link button is clicked with no selection", function() {
             beforeEach(function() {
                spyOn(window, 'prompt').and.returnValue("http://www.google.com");
                $(".wedit-link").click();
@@ -143,7 +143,7 @@ describe("Weditor", function() {
             });
          });
 
-         describe("when Quotes button is clicked with no selection", function() {
+         describe("when the Quotes button is clicked with no selection", function() {
             beforeEach(function() {
                $(".wedit-quotes").click();
             });
@@ -161,7 +161,7 @@ describe("Weditor", function() {
             });
          });
 
-         describe("when Ordered List button is clicked with no selection", function() {
+         describe("when the Ordered List button is clicked with no selection", function() {
             beforeEach(function() {
                $(".wedit-olist").click();
             });
@@ -195,7 +195,7 @@ describe("Weditor", function() {
             });
          });
 
-         describe("when Unordered List button is clicked with no selection", function() {
+         describe("when the Unordered List button is clicked with no selection", function() {
             beforeEach(function() {
                $(".wedit-list").click();
             });
@@ -229,9 +229,9 @@ describe("Weditor", function() {
             });
          });
 
-         describe("when Title button is clicked with no selection", function() {
+         describe("when the Heading button is clicked with no selection", function() {
             beforeEach(function() {
-               $(".wedit-title").click();
+               $(".wedit-heading").click();
             });
 
             it("should insert the default header text at cursor", function() {
@@ -246,9 +246,9 @@ describe("Weditor", function() {
                expect(jQuery.fn.setSelection).toHaveBeenCalledWith(2, 9);
             });
 
-            describe("when Title button is clicked second time", function() {
+            describe("when Heading button is clicked second time", function() {
                beforeEach(function() {
-                  $(".wedit-title").click();
+                  $(".wedit-heading").click();
                });
 
                it("should add second hash symbol", function() {
@@ -265,7 +265,7 @@ describe("Weditor", function() {
             });
          });
 
-         describe("when Pagebreak button is clicked with no selection", function() {
+         describe("when the Pagebreak button is clicked with no selection", function() {
             beforeEach(function() {
                $(".wedit-pagebreak").click();
             });
@@ -276,6 +276,86 @@ describe("Weditor", function() {
 
             it("should update the preview div", function() {
                expect($(".wedit-preview").html()).toBe('<hr>');
+            });
+         });
+
+         describe("when the Undo button is clicked", function() {
+            beforeEach(function() {
+               $(".wedit-bold").click();
+               $(".wedit-italic").click();
+               $(".wedit-undo").click();
+            });
+
+            it("should set the input value to the previous index of the undo stack", function() {
+               expect($("#it").val()).toBe("**strong text**");
+            });
+
+            it("should update the preview div", function() {
+               expect($(".wedit-preview").html()).toBe("<p><strong>strong text</strong></p>")
+            });
+
+            describe("when the Undo button is clicked twice", function() {
+               beforeEach(function() {
+                  $(".wedit-undo").click();
+               });
+
+               it("should undo again", function() {
+                  expect($("#it").val()).toBe("");
+               });
+
+               it("should update the preview div", function() {
+                  expect($(".wedit-preview").html()).toBe("")
+               });
+
+               describe("when the Redo button is clicked", function() {
+                  beforeEach(function() {
+                     $(".wedit-redo").click();
+                  });
+
+                  it("should set the input value to the next index of the undo stack", function() {
+                     expect($("#it").val()).toBe("**strong text**");
+                  });
+
+                  it("should update the preview div", function() {
+                     expect($(".wedit-preview").html()).toBe("<p><strong>strong text</strong></p>")
+                  });
+
+                  describe("clicking the redo button a second time", function() {
+                     beforeEach(function() {
+                        $(".wedit-redo").click();
+                     });
+
+                     it("should continue through the undo stack", function() {
+                        expect($("#it").val()).toBe("**strong text***italic text*");
+                     });
+
+                     it("should update the preview div", function() {
+                        expect($(".wedit-preview").html()).toBe("<p><strong>strong text<em></em></strong><em>italic text</em></p>")
+                     });
+                  });
+               });
+            });
+         });
+
+         describe("clicking the undo button when there is nothing to undo", function() {
+            beforeEach(function() {
+               $(".wedit-undo").click();
+               spyOn(jQuery.fn, "val");
+            });
+
+            it("should do nothing", function() {
+               expect(jQuery.fn.val.calls.any()).toEqual(false);
+            });
+         });
+
+         describe("clicking the redo button when there is nothing to redo", function() {
+            beforeEach(function() {
+               spyOn(jQuery.fn, "val");
+               $(".wedit-redo").click();
+            });
+
+            it("should do nothing when there is nothing to redo", function() {
+               expect(jQuery.fn.val.calls.any()).toEqual(false);
             });
          });
 
@@ -394,9 +474,9 @@ describe("Weditor", function() {
                });
             });
 
-            describe("when Title button is clicked", function() {
+            describe("when Heading button is clicked", function() {
                beforeEach(function() {
-                  $(".wedit-title").click();
+                  $(".wedit-heading").click();
                });
 
                it("should add a hash to the whole line", function() {
@@ -411,9 +491,9 @@ describe("Weditor", function() {
                   expect(jQuery.fn.setSelection).toHaveBeenCalledWith(2, 27);
                });
 
-               describe("when Title button is clicked second time", function() {
+               describe("when Heading button is clicked second time", function() {
                   beforeEach(function() {
-                     $(".wedit-title").click();
+                     $(".wedit-heading").click();
                   });
 
                   it("should add second hash symbol", function() {
@@ -680,15 +760,15 @@ describe("Weditor", function() {
                });
             });
 
-            describe("title shortcut", function() {
+            describe("heading shortcut", function() {
                beforeEach(function() {
-                  spyOn(Weditor.Actions, "title");
+                  spyOn(Weditor.Actions, "heading");
                   keypress.keyCode = 72;
                   $("#it").trigger(keypress);
                });
 
-               it("should call the title action", function() {
-                  expect(Weditor.Actions.title).toHaveBeenCalled();
+               it("should call the heading action", function() {
+                  expect(Weditor.Actions.heading).toHaveBeenCalled();
                });
             });
 
@@ -706,7 +786,6 @@ describe("Weditor", function() {
 
             describe("redo shortcut", function() {
                beforeEach(function() {
-                  spyOn(window, 'alert').and.returnValue(true);
                   spyOn(Weditor.Actions, "redo");
                   keypress.keyCode = 89;
                   $("#it").trigger(keypress);
@@ -719,7 +798,6 @@ describe("Weditor", function() {
 
             describe("undo shortcut", function() {
                beforeEach(function() {
-                  spyOn(window, 'alert').and.returnValue(true);
                   spyOn(Weditor.Actions, "undo");
                   keypress.keyCode = 90;
                   $("#it").trigger(keypress);
@@ -732,7 +810,6 @@ describe("Weditor", function() {
 
             describe("alternate redo shortcut", function() {
                beforeEach(function() {
-                  spyOn(window, 'alert').and.returnValue(true);
                   spyOn(Weditor.Actions, "redo");
                   keypress.shiftKey = true;
                   keypress.keyCode = 90;
