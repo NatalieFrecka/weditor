@@ -59,6 +59,16 @@ function Weditor(inputElement) {
          }
       };
 
+      addEvent(inputElement, "paste drop", function(event) { 
+         var selection = inputElement.caret();
+         var dataTransfer = event.originalEvent.clipboardData || event.originalEvent.dataTransfer;
+         selection.text = dataTransfer.getData("text");
+         event.preventDefault();
+         undoMan.addToStack();
+         Weditor.Utils.replaceSelection(inputElement, selection);
+         undoMan.addToStack();
+      });
+
       addEvent(inputElement, "keydown", function(key) {
          var keyCodeMap = {"b": Weditor.Actions.bold, "i": Weditor.Actions.italic, "l": Weditor.Actions.link, 
                            "q": Weditor.Actions.quotes, "o": Weditor.Actions.olist, "u": Weditor.Actions.list, 
@@ -426,57 +436,6 @@ Weditor.Utils = {
 
       inputElement.setSelection(start, end);
       Weditor.PreviewManager.refreshPreview(inputElement);
-   },
-
-   waitforpastedata: function(inputElement,savedcontent) {
-      if (inputElement.childNodes && inputElement.childNodes.length > 0) {
-         Weditor.Utils.processpaste(inputElement, savedcontent);
-      } else {
-           that = {
-               e: inputElement,
-               s: savedcontent
-           }
-           that.callself = function () {
-               Weditor.Utils.waitforpastedata(that.e, that.s)
-           }
-           setTimeout(that.callself,20);
-       }
-   },
-
-   processpaste: function(inputElement, savedcontent) {
-       pasteddata = inputElement.innerHTML;
-       inputElement.innerHTML = savedcontent;
-
-       alert(pasteddata);
-   },
-
-   handlePaste: function(inputElement, event) {
-      var savedcontent = inputElement.innerHTML;
-      // undoMan.addToStack();
-         console.log(event)
-
-      if (event && event.clipboardData && event.clipboardData.getData) {
-         if (/text\/html/.test(event.clipboardData.types)) {
-            inputElement.innerHTML = event.clipboardData.getData('text/html');
-         } else if (/text\/plain/.test(event.clipboardData.types)) {
-            inputElement.innerHTML = event.clipboardData.getData('text/plain');
-         } else {
-            inputElement.innerHTML = "";
-         }
-
-         Weditor.Utils.waitforpastedata(inputElement, savedcontent);
-         
-         if (event.preventDefault) {
-             event.stopPropagation();
-             event.preventDefault();
-         }
-
-         return false;
-      } else {
-         inputElement.innerHTML = "";
-         Weditor.Utils.waitforpastedata(inputElement, savedcontent);
-         return true;
-      }
    }
 }
 
