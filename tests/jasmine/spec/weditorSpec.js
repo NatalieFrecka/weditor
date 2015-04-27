@@ -290,6 +290,10 @@ describe("Weditor", function() {
                expect($("#it").val()).toBe("**strong text**");
             });
 
+            it("should update the preview div", function() {
+               expect($(".wedit-preview").html()).toBe("<p><strong>strong text</strong></p>")
+            });
+
             describe("when the Undo button is clicked twice", function() {
                beforeEach(function() {
                   $(".wedit-undo").click();
@@ -297,6 +301,10 @@ describe("Weditor", function() {
 
                it("should undo again", function() {
                   expect($("#it").val()).toBe("");
+               });
+
+               it("should update the preview div", function() {
+                  expect($(".wedit-preview").html()).toBe("")
                });
 
                describe("when the Redo button is clicked", function() {
@@ -308,6 +316,10 @@ describe("Weditor", function() {
                      expect($("#it").val()).toBe("**strong text**");
                   });
 
+                  it("should update the preview div", function() {
+                     expect($(".wedit-preview").html()).toBe("<p><strong>strong text</strong></p>")
+                  });
+
                   describe("clicking the redo button a second time", function() {
                      beforeEach(function() {
                         $(".wedit-redo").click();
@@ -315,6 +327,10 @@ describe("Weditor", function() {
 
                      it("should continue through the undo stack", function() {
                         expect($("#it").val()).toBe("**strong text***italic text*");
+                     });
+
+                     it("should update the preview div", function() {
+                        expect($(".wedit-preview").html()).toBe("<p><strong>strong text<em></em></strong><em>italic text</em></p>")
                      });
                   });
                });
@@ -342,25 +358,6 @@ describe("Weditor", function() {
 
             it("should save text state and allow user to undo", function() {
                expect($("#it").val()).toBe("I typed something");
-            });
-         });
-
-         describe("when user pastes content into window", function() {
-            var keypress = $.Event('keydown');
-            keypress.keyCode = 86;
-            keypress.metaKey = true;
-            
-            beforeEach(function() {
-               $("#it").val("My content is great.");
-               $("#it").trigger(keypress);
-               $("#it").val("My content is great. I mean it.");
-               $("#it").trigger(keypress);
-
-               $(".wedit-undo").click();
-            });
-
-            it("should save the state and allow user to undo", function() {
-               expect($("#it").val()).toBe("My content is great.");
             });
          });
 

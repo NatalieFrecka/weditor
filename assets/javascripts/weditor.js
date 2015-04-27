@@ -10,7 +10,7 @@ function Weditor(inputElement) {
       this.activatePreview(this.inputElement, this.previewElement);
       this.activateControls(this.controlsElement);
       this.activateInput(this.inputElement, this.controlsElement, this.previewElement);
-      this.activateKeyEvents(this.inputElement);
+      this.handleInputEvents(this.inputElement);
 
       this.updatePreview();
    };
@@ -47,7 +47,7 @@ function Weditor(inputElement) {
       });
    };
 
-   this.activateKeyEvents = function(inputElement) {
+   this.handleInputEvents = function(inputElement) {
       var typingTimer;
       var timeInterval = 2000;
 
@@ -59,7 +59,7 @@ function Weditor(inputElement) {
          }
       };
 
-      addEvent(inputElement, "paste drop", function(event) { 
+      addEvent(inputElement, "paste drop", function(event) {
          var selection = inputElement.caret();
          var dataTransfer = event.originalEvent.clipboardData || event.originalEvent.dataTransfer;
          selection.text = dataTransfer.getData("text");
@@ -93,20 +93,22 @@ function Weditor(inputElement) {
 
       addEvent(inputElement, "keyup", function(key) {
          var keyCode = key.charCode || key.keyCode;
+         var period = (keyCode === 190 && !key.shiftKey);
+         var comma = (keyCode === 191 && !key.shiftKey);
 
-         if (!key.shiftKey && !key.ctrlKey && !key.metaKey) {
-            if (keyCode === 13) {
+         if (keyCode === 13) {
+            undoMan.addToStack();
+
+            if (!key.shiftKey && !key.ctrlKey && !key.metaKey) {
                Weditor.Utils.doAutoindent(inputElement, inputElement.caret());
+               undoMan.addToStack();
             }
-         }
-
-         if (keyCode === 13 || keyCode === 32 || keyCode === 8 || (keyCode === 190 && !key.shiftKey) || (keyCode === 191 && key.shiftKey)) {
+         } else if (keyCode === 32 || keyCode === 8 || period || comma) {
             undoMan.addToStack();
          }
 
          clearTimeout(typingTimer);
          typingTimer = setTimeout(undoMan.addToStack, timeInterval);
-         
       });
    };
 
@@ -439,14 +441,6 @@ Weditor.Utils = {
    }
 }
 
-// Problems with undo manager:
-// Must limit undoStack length? Maybe to 0-99
-// addToStack needs to be triggered less often. Every keyup is dumb.
-// OR need to add a method that determines whether change is significant enough
-
-// Current plan: trigger add on punctuation, delete, enter, style change, maybe spacebar
-// Set timeout to trigger add after 30 seconds
-
 Weditor.UndoManager = function(inputElement) {
    var undoStack = [];
    var stackIndex;
@@ -457,12 +451,9 @@ Weditor.UndoManager = function(inputElement) {
    };
 
    this.addToStack = function() {
-      // console.log("stack: " + undoStack[undoStack.length - 1])
-      // console.log("val: " + inputElement.val())
       if (undoStack[undoStack.length - 1] != inputElement.val()) {
          undoStack.push(inputElement.val());
          stackIndex++;
-         console.log("added")
       }
    };
 
