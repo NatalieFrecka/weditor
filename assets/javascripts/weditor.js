@@ -152,7 +152,6 @@ Weditor.Actions = {
    link: function(inputElement, undoManager) {
       undoManager.addToStack();
       var selection = inputElement.caret();
-      console.log(selection)
       var link = prompt( "Link to URL", "http://" );
       var linkNumber = inputElement.parent().next().find("a").size() + 1;
       var postfix = "\n[" + linkNumber + "]: " + link;
