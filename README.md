@@ -8,6 +8,7 @@ Weditor is a fusion of [MDMagick][1] and derobins' branch of [wmd][2]. I wanted 
 
 ## Dependencies
  - jquery
+ - jquery ui
  - [jcaret][3]
  - [jquery broswer plugin][4]
  - [showdownt][5]
@@ -39,6 +40,8 @@ Or you can initialize it on page load by giving your input or textarea the class
 
 ## Goals
  1. More robust testing around undo/redo.
- 2. Remove dependency on jquery browser plugin.
- 3. Remove dependency on jcaret (would solve #2).
- 4. Make it better. Always make it better.
+ 2. Exchange slideup/down for css transition.
+ 3. Less flakey test for slideup/slidedown transition.
+ 4. Remove dependency on jquery browser plugin.
+ 5. Remove dependency on jcaret (would solve #4).
+ 6. Make it better. Always make it better.
