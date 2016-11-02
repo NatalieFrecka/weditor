@@ -1,6 +1,4 @@
 # weditor
-
-## About weditor
 Weditor is a fusion of [MDMagick][1] and derobins' branch of [wmd][2]. I wanted to be able to use more than one wmd input per page, which MDMagick supplied, but I wanted to keep all the more advanced features, such as auto-indenting, undo/redo,etc, that MDMagick did not provide. Rather than deconstruct wmd, which is fairly lengthy, I decided to just start with MDMagick and throw pieces of wmd into it. I wed the two of them together. Thus, the name. You will see chunks of both code bases floating around in Weditor, as I tried not to rewrite the portions that worked.
 
 [1]: https://github.com/fguillen/MDMagick
